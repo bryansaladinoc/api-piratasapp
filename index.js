@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const config = require('./config/config');
 const routerApi = require('./routes');
-const mongoose = require('mongoose');
+const main = require('./libs/mongodb');
 
 // app.get('/', (req, res) => {
 //   res.json('Hi Filibustero');
@@ -10,9 +10,11 @@ const mongoose = require('mongoose');
 
 routerApi(app);
 
-mongoose
-  .connect('mongodb://127.0.0.1:27017/piratasapp')
-  .then(() => console.log('Connected!'));
+const mongoDbInit = async () => {
+  await main();
+};
+
+mongoDbInit();
 
 app.listen(config.PORT, () => {
   console.log('Server PiratasApp Ready on port', config.PORT);
