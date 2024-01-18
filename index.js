@@ -7,6 +7,9 @@ const {
   boomErrorHandler,
 } = require('./middlewares/error.handler');
 const main = require('./libs/mongodb');
+require('./utils/auth');
+
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.json('Hi Filibustero');

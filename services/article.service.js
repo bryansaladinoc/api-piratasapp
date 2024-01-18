@@ -1,7 +1,7 @@
 const boom = require('@hapi/boom');
 
 class ArticleService {
-  find() {
+  show() {
     // throw new Error('No Existe Nada');
     throw boom.badData('Informacion invalida');
   }
