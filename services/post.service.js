@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const postSchema = require('../schemas/post.schema');
-const { ObjectId } = require('bson');
 const postModel = mongoose.model('posts', postSchema);
 
 
