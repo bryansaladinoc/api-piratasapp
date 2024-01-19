@@ -3,6 +3,7 @@ const postSchema = require('../schemas/post.schema');
 const postModel = mongoose.model('posts', postSchema);
 
 
+
 class PostService {
   async findAllPost() {
     const result = await postModel.find({ "user.status": 1 }).exec();
@@ -10,7 +11,7 @@ class PostService {
   }
 
   async findPost(idPost) {
-    const result = await postModel.find({ "id": idPost, "user.status": 1 }).exec();
+    const result = await postModel.find({ "_id": idPost, "user.status": 1 }).exec();
     /*  const comentarios = querySelectOne.comments; // Obtiene el arreglo de objetos de comentarios por publicacion
      console.log(Object.keys(comentarios).length); // Obtiene el numero total de comentarios*/
     return await result;
@@ -29,7 +30,7 @@ class PostService {
   }
 
   async findPostByUser(userId) {
-    const result = await postModel.find({ "user.id": userId }).exec();
+    const result = await postModel.find({ "user.idUser": userId }).exec();
     return await result;
   }
 
@@ -39,7 +40,7 @@ class PostService {
   }
 
   async deleteLikePostByUser(idpost, iduser) {
-    const result = await postModel.updateMany({ "_id": idpost }, { $pull: { "likes": { "userId": iduser } } });
+    const result = await postModel.updateMany({ "_id": idpost }, { $pull: { "likes": { "idUser": iduser } } });
     return result;
   }
 
@@ -55,14 +56,34 @@ class PostService {
     return result;
   }
 
-  async updateCollection(idUser, dataPost) {
-    console.log(idUser)
-    const result = await postModel.updateMany({ "user.id": idUser},
-      {$set: {
-        "coments.$.nickname":  dataPost.user.nickname
-      }});
 
-      return result;
+  async updateCollection(idUser, dataPost) {
+    try {
+      /* const session = await postModel.startSession()
+
+      await session.withTransaction(async () => {
+
+        await postModel.updateMany({ "user.idUser": idUser }, { "user.nickname": dataPost.user.nickname }, { session: session });
+
+        await session.endSession(); */
+
+        let Usession = null;
+        return postModel.createCollection().
+          then(() => mongoose.startSession()).
+          then( _session => {
+            Usession = _session;
+            Usession.startTransaction();
+            return postModel.updateMany({ "user.idUser": idUser }, { "user.nickname": dataPost.user.nickname }, { session: Usession })
+          }).
+          then(() => Usession.commitTransaction()).
+          then(() => Usession.endSession());
+
+        /* const findPostByUser = await this.findPostByUser(idUser);*/
+      /* }); */
+    } catch (err) {
+      console.log(err)
+    }
+    return "ok"
   }
 
 }

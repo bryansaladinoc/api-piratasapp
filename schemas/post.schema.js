@@ -1,11 +1,9 @@
-
-const { UUID } = require('bson');
 const mongoose = require('mongoose');
 
 const postSchema = mongoose.Schema({
     createdAt: Date,
     user: {
-        id: String,
+        idUser: String,
         nickname: String,
         name: String,
         imageUserUri: String,
@@ -16,7 +14,7 @@ const postSchema = mongoose.Schema({
     imageContent: String,
     comments: [
         {
-            _id: String,
+            idUser: String,
             nickname: String,
             name: String,
             imageUserUri: String,
@@ -25,7 +23,7 @@ const postSchema = mongoose.Schema({
     ],
     likes: [
         {
-            userId: String
+            idUser: String
         }
     ]
 });
