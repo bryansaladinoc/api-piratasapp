@@ -12,4 +12,17 @@ const userSchema = mongoose.Schema({
   sex: String,
 });
 
-module.exports = userSchema;
+const exampleSchema = mongoose.Schema({
+  name: String,
+  comments: [
+    {
+      contenct: String,
+      user: {
+        name: String,
+        nickname: String,
+      },
+    },
+  ],
+});
+
+module.exports = mongoose.model('user', userSchema);

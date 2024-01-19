@@ -3,35 +3,19 @@ const router = express.Router();
 const ArticleService = require('../services/article.service');
 const service = new ArticleService();
 
-router.get('/', (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
-    service.find();
-    res.json('All News');
+    const news = await service.find();
+    res.status(200).json({ data: news });
   } catch (e) {
     next(e);
   }
 });
 
-router.get('/:id', (req, res, next) => {
+router.post('/', async (req, res) => {
   try {
-    service.find();
-    res.status(201).json('All News 2');
-  } catch (e) {
-    next(e);
-  }
-});
-
-router.put('/:id', (req, res) => {
-  try {
-    res.json('All News');
-  } catch (e) {
-    console.log(e);
-  }
-});
-
-router.post('/', (req, res) => {
-  try {
-    res.json('All News');
+    const result = await service.store({ ...req.body });
+    res.status(201).json({ data: result });
   } catch (e) {
     console.log(e);
   }
