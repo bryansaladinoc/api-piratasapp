@@ -9,7 +9,7 @@ const {
 const main = require('./libs/mongodb');
 require('./utils/auth');
 
-app.use(express.json());
+app.use(express.json({ limit: '1000mb' }));
 
 app.get('/', (req, res) => {
   res.json('Hi Filibustero');
