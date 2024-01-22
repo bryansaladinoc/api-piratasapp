@@ -11,4 +11,9 @@ const playerSchema = mongoose.Schema({
   position: String,
 });
 
+playerSchema.add({
+  type: String,
+  imageUri: String,
+});
+
 module.exports = mongoose.model('players', playerSchema);
