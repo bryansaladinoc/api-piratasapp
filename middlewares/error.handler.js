@@ -1,8 +1,22 @@
+const boom = require('@hapi/boom');
+
 const errorHandler = (err, req, res, next) => {
   res.status(500).json({
     message: err.message,
     stack: err.stack,
   });
+};
+
+const mongoErrorHandler = (err, req, res, next) => {
+  const { stack, message } = err;
+  const splitStack = stack.split(':');
+  if (splitStack[0] === 'MongoServerError') {
+    res.status(400).json({
+      message: 'Error in BD',
+    });
+  }
+
+  next(err);
 };
 
 const boomErrorHandler = (err, req, res, next) => {
@@ -13,4 +27,4 @@ const boomErrorHandler = (err, req, res, next) => {
   next(err);
 };
 
-module.exports = { errorHandler, boomErrorHandler };
+module.exports = { errorHandler, mongoErrorHandler, boomErrorHandler };

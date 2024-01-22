@@ -3,26 +3,13 @@ const mongoose = require('mongoose');
 const userSchema = mongoose.Schema({
   name: String,
   nickname: String,
-  email: String,
+  email: { type: String, unique: true },
   password: String,
-  phone: String,
+  phone: { type: String, unique: true },
   country: String,
   state: String,
   city: String,
   sex: String,
-});
-
-const exampleSchema = mongoose.Schema({
-  name: String,
-  comments: [
-    {
-      contenct: String,
-      user: {
-        name: String,
-        nickname: String,
-      },
-    },
-  ],
 });
 
 module.exports = mongoose.model('user', userSchema);
