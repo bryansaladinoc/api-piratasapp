@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const postSchema = mongoose.Schema({
-    createdAt: Date,
     user: {
         idUser: String,
         nickname: String,
@@ -18,7 +17,8 @@ const postSchema = mongoose.Schema({
             nickname: String,
             name: String,
             imageUserUri: String,
-            comment: String
+            comment: String,
+            createdAt: Date
         }
     ],
     likes: [
@@ -26,6 +26,6 @@ const postSchema = mongoose.Schema({
             idUser: String
         }
     ]
-});
+},  { timestamps: true });
 
 module.exports = postSchema;

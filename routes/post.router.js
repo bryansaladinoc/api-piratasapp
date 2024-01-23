@@ -3,6 +3,7 @@ const router = express.Router();
 const PostService = require('../services/post.service');
 const service = new PostService();
 
+//POSTS
 router.get('/', async (req, res, next) => {
   try {
     const response = await service.findAllPost(); // ENLISTA TODOS LOS POST
@@ -21,6 +22,7 @@ router.post('/newpost', async (req, res, next) => {
   }
 });
 
+//LIKES
 router.post('/likepost', async (req, res, next) => {
   try {
     const response = await service.likePostByUser({ ...req.body }); //AÑADE EL LIKE DEL USUARIO
@@ -40,10 +42,11 @@ router.delete('/likepost/:idpost/:iduser', async (req, res, next) => {
   }
 });
 
-router.post('/commets', async (req, res, next) => {
+//COMENTARIOS
+router.post('/comments', async (req, res, next) => {
   try {
     const response = await service.commentsByPost({ ...req.body});
-    res.status(200).json({ data: response }); // ENLISTA LOS COMENTARIOS
+    res.status(200).json({ data: response }); // REGISTRAR NUEVO COMENTARIO 
   } catch (e) {
     next(e);
   }
@@ -59,6 +62,8 @@ router.delete('/comments/:idpost/:idcomment', async (req, res, next) => {
   }
 });
 
+
+//POSTS ESPECIFICOS
 router.get('/byuser/:idUser', async (req, res, next) => {
   const { idUser } = req.params;
   try {
@@ -90,6 +95,7 @@ router.delete('/deletepost/:id', async (req, res, next) => {
 });
 
 
+//ESTE METODO NO ES DE POSTS IRIA EN USUARIOS
 router.patch('/updatecollection/:idUser', async (req, res, next) => {
   const { idUser } = req.params;
   try {

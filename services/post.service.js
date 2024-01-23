@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const postSchema = require('../schemas/post.schema');
+const boom = require('@hapi/boom');
 const postModel = mongoose.model('posts', postSchema);
 
 
@@ -18,15 +19,15 @@ class PostService {
   }
 
   async createPost(dataPost) {
-    const result = new postModel({ ...dataPost });
+    const result = await new postModel(
+      { ...dataPost });
     await result.save();
     return result;
   }
 
   async deletePost(idPost) {
     const result = await postModel.deleteOne({ "_id": idPost });
-    console.log(result)
-    return idPost;
+    return result;
   }
 
   async findPostByUser(userId) {
@@ -44,9 +45,8 @@ class PostService {
     return result;
   }
 
-  //LOS COMENTARIOS POR USUARIO EN EL POST SE OBTENDRAN DESDE EL FROND
-  //ESTE METODO REGISTRA NUEVOS COMENTARIOS
-  async commentsByPost(dataPost) {
+  //LOS COMENTARIOS POR USUARIO EN EL POST SE OBTENDRAN DESDE EL FRONT CON EL METODO findPost O PUEDE SER findPostByUser
+  async commentsByPost(dataPost) {   //ESTE METODO REGISTRA NUEVOS COMENTARIOS
     const result = await postModel.updateMany({ "_id": dataPost.idPost }, { $push: { 'comments': dataPost.comments } });
     return result;
   }
@@ -57,33 +57,57 @@ class PostService {
   }
 
 
+  // USO DE TRANSACCIONES, RECORDAR CONFIGURAR EL .ENV PARA UTIILIZAR ESTA FUNCIONALIDAD
+  // ADEMAS DE REALIZAR LA REPLICA DE DATOS EN MONGO
+  // EL SIGUIENTE METODO ACTUALIZA LOS POSTS Y LOS COMENTARIOS DESPUES DE ACTUALIZAR LA INFOMACIÓN DEL USUARIO
   async updateCollection(idUser, dataPost) {
+    const session = await postModel.startSession()
+    await session.startTransaction();
+
     try {
-      /* const session = await postModel.startSession()
+      //ACTUALIZAR USUARIO
 
-      await session.withTransaction(async () => {
 
-        await postModel.updateMany({ "user.idUser": idUser }, { "user.nickname": dataPost.user.nickname }, { session: session });
 
-        await session.endSession(); */
+      // ACTUALIZA LA INFORMACION DEL USARIO EN TODOS LOS POST QUE EL HAYA REALIZADO
+      const filterPost = { "user.idUser": idUser }; 
+      const actualizarPosts = await postModel.updateMany(filterPost,
+        {
+          "user.nickname": dataPost.user.nickname,
+          "user.name": dataPost.user.name,
+          "user.imageUserUri": dataPost.user.imageUserUri,
+          "user.status": dataPost.user.status,
+        }, { session });
 
-        let Usession = null;
-        return postModel.createCollection().
-          then(() => mongoose.startSession()).
-          then( _session => {
-            Usession = _session;
-            Usession.startTransaction();
-            return postModel.updateMany({ "user.idUser": idUser }, { "user.nickname": dataPost.user.nickname }, { session: Usession })
-          }).
-          then(() => Usession.commitTransaction()).
-          then(() => Usession.endSession());
+      // ACTUALIZA TODOS LOS  COMENTARIOS QUE EL USUARIO HAYA REALIZADO EN TODOS LOS POSTS
+      const filterComment = { "comments.idUser": idUser }; // CONDICION PARA EL QUERY
+      const actualizacion = {
+        $set: {
+          "comments.$[element].nickname": dataPost.user.nickname,
+          "comments.$[element].name": dataPost.user.name,
+          "comments.$[element].imageUserUri": dataPost.user.imageUserUri
+        }
+      };
 
-        /* const findPostByUser = await this.findPostByUser(idUser);*/
-      /* }); */
+      const opciones = {
+        session: session,
+        arrayFilters: [{ "element.idUser": idUser }], // CONDION PARA EL ARREGLO
+        multi: true // IMPORTANTE
+      };
+      const queryD = await postModel.updateMany(filterComment, actualizacion, opciones);
+
+
+      await session.commitTransaction();
+      // console.log(queryS)
+      return "Actualización con exito"
     } catch (err) {
+      await session.abortTransaction(); // ROLLBACK
       console.log(err)
+      return "Hubo un error en el registro, intentalo más tarde."
+    } finally {
+      session.endSession();
+      // console.log('se ejecuta finally');
     }
-    return "ok"
   }
 
 }
