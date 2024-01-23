@@ -8,7 +8,6 @@ const main = async () => {
       //   useNewUrlParser: true,
       //   useUnifiedTopology: true,
     });
-    console.log('Conexión exitosa!!');
   } catch (e) {
     console.log('Error en la conexión :(' + e.message);
   }

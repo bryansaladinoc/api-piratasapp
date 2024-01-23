@@ -3,8 +3,7 @@ const boom = require('@hapi/boom');
 const jwt = require('jsonwebtoken');
 
 const config = require('../config/config');
-const userSchema = require('../schemas/user.schema');
-const User = mongoose.model('users', userSchema);
+const User = require('../schemas/user.schema');
 
 class AuthService {
   async login(phone, password) {

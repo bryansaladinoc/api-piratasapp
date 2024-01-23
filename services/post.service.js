@@ -37,23 +37,23 @@ class PostService {
 
   async likePostByUser(dataPost) {
     const result = await postModel.updateMany({ "_id": dataPost.idPost }, { $push: { 'likes': dataPost.likes } });
-    return result;
+    return await result;
   }
 
   async deleteLikePostByUser(idpost, iduser) {
     const result = await postModel.updateMany({ "_id": idpost }, { $pull: { "likes": { "idUser": iduser } } });
-    return result;
+    return await result;
   }
 
   //LOS COMENTARIOS POR USUARIO EN EL POST SE OBTENDRAN DESDE EL FRONT CON EL METODO findPost O PUEDE SER findPostByUser
   async commentsByPost(dataPost) {   //ESTE METODO REGISTRA NUEVOS COMENTARIOS
     const result = await postModel.updateMany({ "_id": dataPost.idPost }, { $push: { 'comments': dataPost.comments } });
-    return result;
+    return await result;
   }
 
   async deleteCommentByUSer(idpost, idcomment) {
     const result = await postModel.updateMany({ "_id": idpost }, { $pull: { "comments": { "_id": idcomment } } });
-    return result;
+    return await result;
   }
 
 
