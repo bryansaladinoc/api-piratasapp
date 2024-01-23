@@ -6,7 +6,7 @@ const service = new PlayerService();
 
 router.get('/', async (req, res, next) => {
   try {
-    const result = await service.find();
+    const result = await service.find(req.query.type);
     res.status(200).json({ data: result });
   } catch (e) {
     next(e);

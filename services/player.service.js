@@ -2,8 +2,10 @@ const boom = require('@hapi/boom');
 const Player = require('../schemas/player.schema');
 
 class PlayerService {
-  async find() {
-    const player = Player.find().exec();
+  async find(type) {
+    const player = Player.find({
+      type: { $regex: new RegExp(type, 'i') },
+    }).exec();
 
     return player;
   }
