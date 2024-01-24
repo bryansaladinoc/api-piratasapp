@@ -9,7 +9,12 @@ const userSchema = mongoose.Schema({
   country: String,
   state: String,
   city: String,
-  sex: String,
+  sex: String
 });
+
+userSchema.add({
+  image: String
+});
+
 
 module.exports = mongoose.model('user', userSchema);

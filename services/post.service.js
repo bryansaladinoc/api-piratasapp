@@ -71,7 +71,7 @@ class PostService {
 
       // ACTUALIZA LA INFORMACION DEL USARIO EN TODOS LOS POST QUE EL HAYA REALIZADO
       const filterPost = { "user.idUser": idUser }; 
-      const actualizarPosts = await postModel.updateMany(filterPost,
+      const updatePost = await postModel.updateMany(filterPost,
         {
           "user.nickname": dataPost.user.nickname,
           "user.name": dataPost.user.name,
@@ -105,7 +105,7 @@ class PostService {
       console.log(err)
       return "Hubo un error en el registro, intentalo más tarde."
     } finally {
-      session.endSession();
+      await session.endSession();
       // console.log('se ejecuta finally');
     }
   }
