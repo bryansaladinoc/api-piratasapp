@@ -26,9 +26,10 @@ router.post('/signup', async (req, res, next) => {
 });
 
 
-router.patch('/password', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
+
+router.get('/user', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
   try {
-    const result = await service.updateCurrentPass(req.user.sub, { ...req.body });
+    const result = await service.selectUser(req.user.sub);
     return res.status(201).json({ result });
   } catch (e) {
     next(e);
@@ -43,5 +44,16 @@ router.patch('/user/update', passport.authenticate('jwt', { session: false }), a
     next(e);
   }
 });
+
+router.patch('/user/password', passport.authenticate('jwt', { session: false }), async (req, res, next) => {
+  try {
+    const result = await service.updateCurrentPass(req.user.sub, { ...req.body });
+    return res.status(201).json({ result });
+  } catch (e) {
+    next(e);
+  }
+});
+
+
 
 module.exports = router;

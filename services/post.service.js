@@ -7,7 +7,36 @@ const postModel = mongoose.model('posts', postSchema);
 
 class PostService {
   async findAllPost() {
-    const result = await postModel.find({ "user.status": 1 }).exec();
+    const result = postModel.aggregate([
+      {
+        "$match": {
+          "user.status": 1 // Condición para campo1
+          // Puedes agregar otras condiciones aquí
+        },
+      },
+      {
+        "$project": {
+          "user": 1,
+          "user": 1,
+          "_id": 1,
+          "content": 1,
+          "contentType": 1,
+          "imageContent": 1,
+          "likes": 1,
+          "createdAt": 1,
+          "countLikes": { "$size": '$likes' },
+          "countComments": { "$size": '$comments' }
+        }
+      },
+      {
+        $sort: { createdAt: -1 } // Ordena los resultados por el campo 'createdAt' en orden descendente
+      }
+    ]);
+
+    
+    /* await postModel.find({ "user.status": 1 }, 
+     "user _id content contentType imageContent  likes createdAt"
+    ).sort({ ["createdAt"]: 'desc' }).exec(); */
     return await result;
   }
 
@@ -55,61 +84,6 @@ class PostService {
     const result = await postModel.updateMany({ "_id": idpost }, { $pull: { "comments": { "_id": idcomment } } });
     return await result;
   }
-
-
-  // USO DE TRANSACCIONES, RECORDAR CONFIGURAR EL .ENV PARA UTIILIZAR ESTA FUNCIONALIDAD
-  // ADEMAS DE REALIZAR LA REPLICA DE DATOS EN MONGO
-  // EL SIGUIENTE METODO ACTUALIZA LOS POSTS Y LOS COMENTARIOS DESPUES DE ACTUALIZAR LA INFOMACIÓN DEL USUARIO
-  async updateCollection(idUser, dataPost) {
-    const session = await postModel.startSession()
-    await session.startTransaction();
-
-    try {
-      //ACTUALIZAR USUARIO
-
-
-
-      // ACTUALIZA LA INFORMACION DEL USARIO EN TODOS LOS POST QUE EL HAYA REALIZADO
-      const filterPost = { "user.idUser": idUser }; 
-      const updatePost = await postModel.updateMany(filterPost,
-        {
-          "user.nickname": dataPost.user.nickname,
-          "user.name": dataPost.user.name,
-          "user.imageUserUri": dataPost.user.imageUserUri,
-          "user.status": dataPost.user.status,
-        }, { session });
-
-      // ACTUALIZA TODOS LOS  COMENTARIOS QUE EL USUARIO HAYA REALIZADO EN TODOS LOS POSTS
-      const filterComment = { "comments.idUser": idUser }; // CONDICION PARA EL QUERY
-      const actualizacion = {
-        $set: {
-          "comments.$[element].nickname": dataPost.user.nickname,
-          "comments.$[element].name": dataPost.user.name,
-          "comments.$[element].imageUserUri": dataPost.user.imageUserUri
-        }
-      };
-
-      const opciones = {
-        session: session,
-        arrayFilters: [{ "element.idUser": idUser }], // CONDION PARA EL ARREGLO
-        multi: true // IMPORTANTE
-      };
-      const queryD = await postModel.updateMany(filterComment, actualizacion, opciones);
-
-
-      await session.commitTransaction();
-      // console.log(queryS)
-      return "Actualización con exito"
-    } catch (err) {
-      await session.abortTransaction(); // ROLLBACK
-      console.log(err)
-      return "Hubo un error en el registro, intentalo más tarde."
-    } finally {
-      await session.endSession();
-      // console.log('se ejecuta finally');
-    }
-  }
-
 }
 
 module.exports = PostService;

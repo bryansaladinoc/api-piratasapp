@@ -5,7 +5,10 @@ const postSchema = mongoose.Schema({
         idUser: String,
         nickname: String,
         name: String,
+        lastname: String,
+        motherlastname: String,
         imageUserUri: String,
+        rol: String,
         status: Number
     },
     content: String,
@@ -16,7 +19,11 @@ const postSchema = mongoose.Schema({
             idUser: String,
             nickname: String,
             name: String,
+            lastname: String,
+            motherlastname: String,
             imageUserUri: String,
+            rol: String,
+            userStatus: Number,
             comment: String,
             createdAt: Date
         }

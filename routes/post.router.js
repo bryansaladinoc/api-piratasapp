@@ -94,16 +94,4 @@ router.delete('/deletepost/:id', async (req, res, next) => {
   }
 });
 
-
-//ESTE METODO NO ES DE POSTS IRIA EN USUARIOS
-router.patch('/updatecollection/:idUser', async (req, res, next) => {
-  const { idUser } = req.params;
-  try {
-    const response = await service.updateCollection(idUser, { ...req.body }); // ACTUALIZA LA COLLECCION CUANDO EL USUARIO SE MODIFICA
-    res.status(200).json({ data: response });
-  } catch (e) {
-    next(e);
-  }
-});
-
 module.exports = router;
