@@ -8,9 +8,9 @@ const userSchema = mongoose.Schema({
   email: { type: String, unique: true },
   password: String,
   phonecode: {
-    ode: String, 
-    dial_code: String, 
-    flag: String, 
+    ode: String,
+    dial_code: String,
+    flag: String,
     name: String
 },
   phone: { type: String, unique: true },
@@ -22,6 +22,6 @@ const userSchema = mongoose.Schema({
   image: String,
   rol: String,
   status: Number
-});
+},  { timestamps: true });
 
 module.exports = mongoose.model('user', userSchema);
