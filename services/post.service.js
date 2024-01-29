@@ -7,7 +7,7 @@ const postModel = mongoose.model('posts', postSchema);
 
 class PostService {
   async findAllPost() {
-    const result = postModel.aggregate([
+    const result = await postModel.aggregate([
       {
         "$match": {
           "user.status": 1 // Condición para campo1
@@ -16,7 +16,6 @@ class PostService {
       },
       {
         "$project": {
-          "user": 1,
           "user": 1,
           "_id": 1,
           "content": 1,
@@ -36,7 +35,29 @@ class PostService {
   }
 
   async findPost(idPost) {
-    const result = await postModel.find({ "_id": idPost, "user.status": 1 }).exec();
+   // const result = await postModel.findOne({ "_id": idPost}).exec();
+    const result = await postModel.aggregate([
+      {
+        "$match": {
+          "_id": new mongoose.Types.ObjectId(idPost) // Condición para campo1
+          // Puedes agregar otras condiciones aquí
+        },
+      },
+      {
+        "$project": {
+          "user": 1,
+          "_id": 1,
+          "content": 1,
+          "contentType": 1,
+          "imageContent": 1,
+          "likes": 1,
+          "createdAt": 1,
+          "countLikes": { "$size": '$likes' },
+          "countComments": { "$size": '$comments' }
+        }
+      }
+    ]);
+    console.log(result)
     return await result;
   }
 
