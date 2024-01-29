@@ -14,4 +14,22 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+router.get('/states', async (req, res, next) => {
+  try {
+    const result = await service.findStates();
+    res.status(200).json({ data: result });
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.get('/states/:name/cities', async (req, res, next) => {
+  try {
+    const result = await service.findStatesForCity(req.params.name);
+    res.status(200).json({ data: result });
+  } catch (e) {
+    next(e);
+  }
+});
+
 module.exports = router;
