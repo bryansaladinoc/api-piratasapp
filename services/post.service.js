@@ -32,18 +32,11 @@ class PostService {
         $sort: { createdAt: -1 } // Ordena los resultados por el campo 'createdAt' en orden descendente
       }
     ]);
-
-    
-    /* await postModel.find({ "user.status": 1 }, 
-     "user _id content contentType imageContent  likes createdAt"
-    ).sort({ ["createdAt"]: 'desc' }).exec(); */
     return await result;
   }
 
   async findPost(idPost) {
     const result = await postModel.find({ "_id": idPost, "user.status": 1 }).exec();
-    /*  const comentarios = querySelectOne.comments; // Obtiene el arreglo de objetos de comentarios por publicacion
-     console.log(Object.keys(comentarios).length); // Obtiene el numero total de comentarios*/
     return await result;
   }
 
@@ -74,16 +67,30 @@ class PostService {
     return await result;
   }
 
-  //LOS COMENTARIOS POR USUARIO EN EL POST SE OBTENDRAN DESDE EL FRONT CON EL METODO findPost O PUEDE SER findPostByUser
-  async commentsByPost(dataPost) {   //ESTE METODO REGISTRA NUEVOS COMENTARIOS
+  //ESTE METODO REGISTRA NUEVOS COMENTARIOS
+  async createComment(dataPost) {
     const result = await postModel.updateMany({ "_id": dataPost.idPost }, { $push: { 'comments': dataPost.comments } });
     return await result;
   }
 
-  async deleteCommentByUSer(idpost, idcomment) {
+  async deleteComment(idpost, idcomment) {
     const result = await postModel.updateMany({ "_id": idpost }, { $pull: { "comments": { "_id": idcomment } } });
     return await result;
   }
+
+  async commentsByPost(idPost, idUser) {
+    const result = await postModel.findOne({ "_id": idPost }, "comments");
+
+    result.comments.sort((a, b) => b.createdAt - a.createdAt);
+
+    const _id = result._id;
+    const commentsUser = result.comments.filter(item => item.idUser === idUser);
+    const comments = result.comments.filter(item => item.idUser !== idUser);
+
+    return { _id , commentsUser, comments};
+  }
 }
+
+
 
 module.exports = PostService;
