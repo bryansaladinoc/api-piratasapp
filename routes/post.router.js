@@ -42,6 +42,16 @@ router.delete('/likepost/:idpost/:iduser', async (req, res, next) => {
   }
 });
 
+router.get('/likepost/:idpost', async (req, res, next) => {
+  const { idpost } = req.params;
+  try {
+    const response = await service.countLikes(idpost); // ELIMINA EL LIKE DEL USUARIO
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
 //COMENTARIOS
 router.post('/comments', async (req, res, next) => {
   try {

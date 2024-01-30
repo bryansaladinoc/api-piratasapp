@@ -50,16 +50,35 @@ class PostService {
           "content": 1,
           "contentType": 1,
           "imageContent": 1,
-          "likes": 1,
+          // "likes": 1,
           "createdAt": 1,
-          "countLikes": { "$size": '$likes' },
-          "countComments": { "$size": '$comments' }
+          // "countLikes": { "$size": '$likes' },
+          // "countComments": { "$size": '$comments' }
         }
       }
     ]);
-    console.log(result)
     return await result;
   }
+
+  async countLikes(idPost) {
+     const result = await postModel.aggregate([
+       {
+         "$match": {
+           "_id": new mongoose.Types.ObjectId(idPost) // Condición para campo1
+           // Puedes agregar otras condiciones aquí
+         },
+       },
+       {
+         "$project": {
+           "_id": 1,
+           "likes": 1,
+           "countLikes": { "$size": '$likes' },
+           "countComments": { "$size": '$comments' }
+         }
+       }
+     ]);
+     return await result;
+   }
 
   async createPost(dataPost) {
     const result = await new postModel(
