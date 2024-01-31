@@ -45,17 +45,28 @@ router.delete('/likepost/:idpost/:iduser', async (req, res, next) => {
 //COMENTARIOS
 router.post('/comments', async (req, res, next) => {
   try {
-    const response = await service.commentsByPost({ ...req.body});
-    res.status(200).json({ data: response }); // REGISTRAR NUEVO COMENTARIO 
+    const response = await service.createComment({ ...req.body});
+    res.status(200).json({ data: response }); // REGISTRAR NUEVO COMENTARIO
   } catch (e) {
     next(e);
   }
 });
 
-router.delete('/comments/:idpost/:idcomment', async (req, res, next) => {
+router.delete('/comments/delete/:idpost/:idcomment', async (req, res, next) => {
   const { idpost,  idcomment} = req.params;
   try {
-    const response = await service.deleteCommentByUSer(idpost,idcomment); // ELIMINA LOS COMENTARIOS POR ID DEL COMENTARIO
+    const response = await service.deleteComment(idpost,idcomment); // ELIMINA LOS COMENTARIOS POR ID DEL COMENTARIO
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.get('/comments/find/:idpost/:iduser', async (req, res, next) => {
+  const { idpost,  iduser} = req.params;
+
+  try {
+    const response = await service.commentsByPost(idpost,iduser); // ELIMINA LOS COMENTARIOS POR ID DEL COMENTARIO
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
@@ -88,18 +99,6 @@ router.delete('/deletepost/:id', async (req, res, next) => {
   const { id } = req.params;
   try {
     const response = await service.deletePost(id); // ELIMINA EL POST
-    res.status(200).json({ data: response });
-  } catch (e) {
-    next(e);
-  }
-});
-
-
-//ESTE METODO NO ES DE POSTS IRIA EN USUARIOS
-router.patch('/updatecollection/:idUser', async (req, res, next) => {
-  const { idUser } = req.params;
-  try {
-    const response = await service.updateCollection(idUser, { ...req.body }); // ACTUALIZA LA COLLECCION CUANDO EL USUARIO SE MODIFICA
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
