@@ -93,7 +93,7 @@ class PostService {
   }
 
   async findPostByUser(userId) {
-    const result = await postModel.find({ "user.idUser": userId }).exec();
+    const result = await postModel.find({ "user.idUser": userId }).sort({ 'createdAt': -1 }).exec();
     return await result;
   }
 
