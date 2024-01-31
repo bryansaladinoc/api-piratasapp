@@ -6,7 +6,7 @@ const postModel = mongoose.model('posts', postSchema);
 
 
 class PostService {
-  async findAllPost() {
+  async findAllPost(page) {
     const result = await postModel.aggregate([
       {
         "$match": {
@@ -27,10 +27,11 @@ class PostService {
           "countComments": { "$size": '$comments' }
         }
       },
-      {
-        $sort: { createdAt: -1 } // Ordena los resultados por el campo 'createdAt' en orden descendente
-      }
+      {$sort: { createdAt: -1 }},
+      { $skip: (page - 1) * 7},
+      { $limit: 7 }
     ]);
+    
     return await result;
   }
 
@@ -92,8 +93,12 @@ class PostService {
     return result;
   }
 
-  async findPostByUser(userId) {
-    const result = await postModel.find({ "user.idUser": userId }).sort({ 'createdAt': -1 }).exec();
+  async findPostByUser(userId, page) {
+    const result = await postModel.find({ "user.idUser": userId })
+                                  .skip((page - 1) * 7)
+                                  .limit(7)
+                                  .sort({ 'createdAt': -1 })
+                                  .exec();
     return await result;
   }
 
