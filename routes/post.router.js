@@ -6,7 +6,6 @@ const service = new PostService();
 //POSTS
 router.get('/', async (req, res, next) => {
   const page = req.query.page;
-  console.log(page)
   try {
     const response = await service.findAllPost(page); // ENLISTA TODOS LOS POST
     res.status(200).json({ data: response });
@@ -74,11 +73,12 @@ router.delete('/comments/delete/:idpost/:idcomment', async (req, res, next) => {
   }
 });
 
-router.get('/comments/find/:idpost/:iduser', async (req, res, next) => {
-  const { idpost,  iduser} = req.params;
+router.get('/comments/find/:idpost/', async (req, res, next) => {
+  const { idpost} = req.params;
+  const page = req.query.page;
 
   try {
-    const response = await service.commentsByPost(idpost,iduser); // ELIMINA LOS COMENTARIOS POR ID DEL COMENTARIO
+    const response = await service.commentsByPost(idpost, page); // ELIMINA LOS COMENTARIOS POR ID DEL COMENTARIO
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);

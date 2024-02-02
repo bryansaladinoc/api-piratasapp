@@ -123,16 +123,13 @@ class PostService {
     return await result;
   }
 
-  async commentsByPost(idPost, idUser) {
-    const result = await postModel.findOne({ "_id": idPost }, "comments");
-
-    result.comments.sort((a, b) => b.createdAt - a.createdAt);
-
-    const _id = result._id;
-    const commentsUser = result.comments.filter(item => item.idUser === idUser);
-    const comments = result.comments.filter(item => item.idUser !== idUser);
-
-    return { _id , commentsUser, comments};
+  async commentsByPost(idPost, page) {
+    const result = await postModel.findOne({ "_id": idPost }, 'comments').exec();
+    
+      const commentsPage = result.comments
+      .sort((a, b) => b.createdAt - a.createdAt) // Ordena por fecha en orden descendente (más reciente primero)
+      .slice((page - 1) * 5, page * 6); 
+    return commentsPage;
   }
 }
 
