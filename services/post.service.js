@@ -3,8 +3,6 @@ const postSchema = require('../schemas/post.schema');
 const boom = require('@hapi/boom');
 const postModel = mongoose.model('posts', postSchema);
 
-
-
 class PostService {
   async findAllPost(page) {
     const result = await postModel.aggregate([
@@ -31,7 +29,7 @@ class PostService {
       { $skip: (page - 1) * 7},
       { $limit: 7 }
     ]);
-    
+
     return await result;
   }
 
