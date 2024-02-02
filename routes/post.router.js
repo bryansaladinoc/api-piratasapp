@@ -5,8 +5,9 @@ const service = new PostService();
 
 //POSTS
 router.get('/', async (req, res, next) => {
+  const page = req.query.page;
   try {
-    const response = await service.findAllPost(); // ENLISTA TODOS LOS POST
+    const response = await service.findAllPost(page); // ENLISTA TODOS LOS POST
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
@@ -42,6 +43,16 @@ router.delete('/likepost/:idpost/:iduser', async (req, res, next) => {
   }
 });
 
+router.get('/likepost/:idpost', async (req, res, next) => {
+  const { idpost } = req.params;
+  try {
+    const response = await service.countLikes(idpost); // ELIMINA EL LIKE DEL USUARIO
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
 //COMENTARIOS
 router.post('/comments', async (req, res, next) => {
   try {
@@ -58,7 +69,7 @@ router.delete('/comments/delete/:idpost/:idcomment', async (req, res, next) => {
     const response = await service.deleteComment(idpost,idcomment); // ELIMINA LOS COMENTARIOS POR ID DEL COMENTARIO
     res.status(200).json({ data: response });
   } catch (e) {
-    next(e);
+    next(e);1
   }
 });
 
@@ -77,8 +88,10 @@ router.get('/comments/find/:idpost/:iduser', async (req, res, next) => {
 //POSTS ESPECIFICOS
 router.get('/byuser/:idUser', async (req, res, next) => {
   const { idUser } = req.params;
+  const page = req.query.page;
+
   try {
-    const response = await service.findPostByUser(idUser); // BUSCA POSTS POR USUARIO
+    const response = await service.findPostByUser(idUser, page); // BUSCA POSTS POR USUARIO
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);

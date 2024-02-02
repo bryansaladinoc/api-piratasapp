@@ -3,10 +3,8 @@ const postSchema = require('../schemas/post.schema');
 const boom = require('@hapi/boom');
 const postModel = mongoose.model('posts', postSchema);
 
-
-
 class PostService {
-  async findAllPost() {
+  async findAllPost(page) {
     const result = await postModel.aggregate([
       {
         "$match": {
@@ -27,10 +25,11 @@ class PostService {
           "countComments": { "$size": '$comments' }
         }
       },
-      {
-        $sort: { createdAt: -1 } // Ordena los resultados por el campo 'createdAt' en orden descendente
-      }
+      {$sort: { createdAt: -1 }},
+      { $skip: (page - 1) * 7},
+      { $limit: 7 }
     ]);
+
     return await result;
   }
 
@@ -50,16 +49,35 @@ class PostService {
           "content": 1,
           "contentType": 1,
           "imageContent": 1,
-          "likes": 1,
+          // "likes": 1,
           "createdAt": 1,
-          "countLikes": { "$size": '$likes' },
-          "countComments": { "$size": '$comments' }
+          // "countLikes": { "$size": '$likes' },
+          // "countComments": { "$size": '$comments' }
         }
       }
     ]);
-    console.log(result)
     return await result;
   }
+
+  async countLikes(idPost) {
+     const result = await postModel.aggregate([
+       {
+         "$match": {
+           "_id": new mongoose.Types.ObjectId(idPost) // Condición para campo1
+           // Puedes agregar otras condiciones aquí
+         },
+       },
+       {
+         "$project": {
+           "_id": 1,
+           "likes": 1,
+           "countLikes": { "$size": '$likes' },
+           "countComments": { "$size": '$comments' }
+         }
+       }
+     ]);
+     return await result;
+   }
 
   async createPost(dataPost) {
     const result = await new postModel(
@@ -73,8 +91,12 @@ class PostService {
     return result;
   }
 
-  async findPostByUser(userId) {
-    const result = await postModel.find({ "user.idUser": userId }).exec();
+  async findPostByUser(userId, page) {
+    const result = await postModel.find({ "user.idUser": userId })
+                                  .skip((page - 1) * 7)
+                                  .limit(7)
+                                  .sort({ 'createdAt': -1 })
+                                  .exec();
     return await result;
   }
 
