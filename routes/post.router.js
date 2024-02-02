@@ -69,7 +69,7 @@ router.delete('/comments/delete/:idpost/:idcomment', async (req, res, next) => {
     const response = await service.deleteComment(idpost,idcomment); // ELIMINA LOS COMENTARIOS POR ID DEL COMENTARIO
     res.status(200).json({ data: response });
   } catch (e) {
-    next(e);1 
+    next(e);1
   }
 });
 
