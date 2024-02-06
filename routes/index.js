@@ -9,6 +9,7 @@ const productRouter = require('./product.router');
 const authRouter = require('./auth.router');
 const newsRouter = require('./news.router');
 const playerRouter = require('./roster.router');
+const postalCodeRouter = require('./postalCode.router');
 
 const routerApi = (app) => {
   app.use('/api/v1', router);
@@ -27,6 +28,7 @@ const routerApi = (app) => {
     passport.authenticate('jwt', { session: false }),
     playerRouter,
   );
+  router.use('/postal-codes', postalCodeRouter);
 };
 
 module.exports = routerApi;

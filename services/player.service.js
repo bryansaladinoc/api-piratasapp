@@ -3,7 +3,7 @@ const Player = require('../schemas/player.schema');
 
 class PlayerService {
   async find(type = '') {
-    const player = Player.find({
+    const player = await Player.find({
       type: { $regex: new RegExp(type, 'i') },
     }).exec();
 
