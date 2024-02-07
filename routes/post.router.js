@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const PostService = require('../services/post.service');
 const service = new PostService();
+const passport = require('passport');
 
 //POSTS
 router.get('/', async (req, res, next) => {
@@ -87,8 +88,8 @@ router.get('/comments/find/:idpost/', async (req, res, next) => {
 
 
 //POSTS ESPECIFICOS
-router.get('/byuser/:idUser', async (req, res, next) => {
-  const { idUser } = req.params;
+router.get('/byuser/', async (req, res, next) => {
+  const idUser = req.user.sub;
   const page = req.query.page;
 
   try {

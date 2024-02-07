@@ -13,11 +13,17 @@ const postalCodeRouter = require('./postalCode.router');
 
 const routerApi = (app) => {
   app.use('/api/v1', router);
-  router.use('/posts', postsRouter);
+  router.use(
+    '/posts', 
+    passport.authenticate('jwt', { session: false }),
+    postsRouter
+  );
+  
   router.use('/store', storeRouter);
   router.use('/order', orderRouter);
   router.use('/product', productRouter);
   router.use('/auth', authRouter);
+  
   router.use(
     '/news',
     passport.authenticate('jwt', { session: false }),

@@ -66,4 +66,17 @@ router.patch(
   },
 );
 
+router.get(
+  '/user/getid',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    try {
+      const data = req.user.sub;
+      return res.status(201).json({ data });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
 module.exports = router;
