@@ -83,12 +83,12 @@ class PostService {
     const result = await new postModel(
       { ...dataPost });
     await result.save();
-    return result;
+    return await result;
   }
 
   async deletePost(idPost) {
     const result = await postModel.deleteOne({ "_id": idPost });
-    return result;
+    return await result;
   }
 
   async findPostByUser(userId, page) {
@@ -147,7 +147,7 @@ class PostService {
       const commentsPage = result.comments
       .sort((a, b) => b.createdAt - a.createdAt) // Ordena por fecha en orden descendente (más reciente primero)
       .slice((page - 1) * 5, page * 6);
-    return commentsPage;
+    return await commentsPage;
   }
 }
 

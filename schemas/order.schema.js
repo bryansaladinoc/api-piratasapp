@@ -19,11 +19,11 @@ const orderSchema = mongoose.Schema(
     products: [
       {
         name: String,
+        sku: String,
         description: String,
         amount: Number,
         price: Number,
         subtotal: Number,
-        stock: Number,
         size: String,
         color: String,
         category: String,
@@ -35,7 +35,6 @@ const orderSchema = mongoose.Schema(
       lastname: String,
       motherLastname: String,
       phone: String,
-      email: String,
     },
   },
   { timestamps: true },

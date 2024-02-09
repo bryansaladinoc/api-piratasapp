@@ -47,7 +47,7 @@ router.delete('/likepost/:idpost/:iduser', async (req, res, next) => {
 router.get('/likepost/:idpost', async (req, res, next) => {
   const { idpost } = req.params;
   try {
-    const response = await service.countLikes(idpost); // ELIMINA EL LIKE DEL USUARIO
+    const response = await service.countLikes(idpost); // CUENTA LOS LIKES POR POST
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
@@ -79,7 +79,7 @@ router.get('/comments/find/:idpost/', async (req, res, next) => {
   const page = req.query.page;
 
   try {
-    const response = await service.commentsByPost(idpost, page); // ELIMINA LOS COMENTARIOS POR ID DEL COMENTARIO
+    const response = await service.commentsByPost(idpost, page); // BUSCA LOS COMENTARIOS POR POST
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
