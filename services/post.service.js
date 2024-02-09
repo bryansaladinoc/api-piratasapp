@@ -92,11 +92,31 @@ class PostService {
   }
 
   async findPostByUser(userId, page) {
-    const result = await postModel.find({ "user.idUser": userId })
-                                  .skip((page - 1) * 7)
-                                  .limit(7)
-                                  .sort({ 'createdAt': -1 })
-                                  .exec();
+    const result = await postModel.aggregate([
+      {
+        "$match": {
+          "user.idUser": userId // Condición para campo1
+          // Puedes agregar otras condiciones aquí
+        },
+      },
+      {
+        "$project": {
+          "user": 1,
+          "_id": 1,
+          "content": 1,
+          "contentType": 1,
+          "imageContent": 1,
+          "likes": 1,
+          "createdAt": 1,
+          "countLikes": { "$size": '$likes' },
+          "countComments": { "$size": '$comments' }
+        }
+      },
+      {$sort: { createdAt: -1 }},
+      { $skip: (page - 1) * 7},
+      { $limit: 7 }
+    ]);
+
     return await result;
   }
 
@@ -123,10 +143,10 @@ class PostService {
 
   async commentsByPost(idPost, page) {
     const result = await postModel.findOne({ "_id": idPost }, 'comments').exec();
-    
+
       const commentsPage = result.comments
       .sort((a, b) => b.createdAt - a.createdAt) // Ordena por fecha en orden descendente (más reciente primero)
-      .slice((page - 1) * 5, page * 6); 
+      .slice((page - 1) * 5, page * 6);
     return commentsPage;
   }
 }
