@@ -25,15 +25,15 @@ class StoreService {
     return await result;
   }
 
-  findEmployee(idStore, phone) {
-    const result = model.findOne({ "_id": idStore, "employees.phone": phone }).exec();
+  async findEmployee(idStore, phone) {
+    const result = await model.findOne({ "_id": idStore, "employees.phone": phone }).exec();
 
     /* const result = model.findOne( // Buscar un empelado que coincida con la condición
       { "_id": idStore, "employees.phone": phone },
       { "employees.$": 1 } // Proyección para seleccionar solo el primer elemento que coincida, se pueden agregar más campos
     ).exec(); */
 
-    return result;
+    return await result;
   }
 
   async deleteEmployee(idStore, phone) {
