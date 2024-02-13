@@ -7,6 +7,8 @@ const authRouter = require('./auth.router');
 const newsRouter = require('./news.router');
 const playerRouter = require('./roster.router');
 const postalCodeRouter = require('./postalCode.router');
+const storeFoodRouter = require('./store.food.router');
+const productFoodRouter = require('./product.food.router');
 
 const routerApi = (app) => {
   app.use('/api/v1', router);
@@ -21,6 +23,16 @@ const routerApi = (app) => {
     '/players',
     passport.authenticate('jwt', { session: false }),
     playerRouter,
+  );
+  router.use(
+    '/stores-food',
+    passport.authenticate('jwt', { session: false }),
+    storeFoodRouter,
+  );
+  router.use(
+    '/products-food',
+    passport.authenticate('jwt', { session: false }),
+    productFoodRouter,
   );
   router.use('/postal-codes', postalCodeRouter);
 };
