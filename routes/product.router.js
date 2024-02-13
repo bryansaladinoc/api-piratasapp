@@ -156,4 +156,15 @@ router.delete('/delete/store/', async (req, res, next) => {
   }
 });
 
+router.delete('/delete/', async (req, res, next) => {
+  const idProduct = req.query.idProduct;
+
+  try {
+    const response = await service.del(idProduct); // ELIMINA UN PRODUCTO
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
 module.exports = router;

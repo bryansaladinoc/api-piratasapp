@@ -15,7 +15,7 @@ class ProductService {
       { "_id": data.idProduct },
       { $push: { "store": data.newStore } }
     ); 
-    return await data;
+    return await result;
   }
 
   async newSpecific(data) { // REGISTRA UNA NUEVA ESPECIFICACION DE UN PRODUCTO
@@ -88,7 +88,7 @@ class ProductService {
 
   async findInStore(idProduct, idStore) {
     const result = await model.findOne( // Buscar un empelado que coincida con la condición
-      { "_id": idProduct, "store.name": idStore },
+      { "_id": idProduct, "store.idStore": idStore },
       { "store.$": 1 } // Proyección para seleccionar solo el primer elemento que coincida, se pueden agregar más campos
     ).exec();
 
@@ -110,7 +110,7 @@ class ProductService {
 
   async upSpecific(data) { // ACTUALIZA LA ESPECIFICAION DE UN PRODUCTO EN UNA TIENDA
     const result = await model.updateOne(
-      { "_id": data.idProd, "store.name": data.idStore, "store.info._id": data.idInfo },
+      { "_id": data.idProd, "store.idStore": data.idStore, "store.info._id": data.idInfo },
       { $set: { 
         "store.$.info.$[i].price": data.price, 
         "store.$.info.$[i].color": data.color, 
@@ -125,13 +125,14 @@ class ProductService {
   }
 
   async del(idProd) {
+    console.log(idProd)
     const result = await model.deleteOne({ "_id": idProd });  // ELIMINA EL PRODUCTO
     return await result;
   }
 
   async delSpecific(idProduct, idStore, idSpecific){
     const result = await model.updateOne(
-      { "_id": idProduct,'store.name': idStore  }, 
+      { "_id": idProduct,'store.idStore': idStore  }, 
     { $pull: 
       { "store.$.info": { "_id": idSpecific } 
     }});
@@ -142,7 +143,7 @@ class ProductService {
     const result = await model.updateOne(
       { "_id": idProd }, 
     { $pull: 
-      { "store": { "name": idStore } 
+      { "store": { "idStore": idStore } 
     }});
     return await result; 
   }
@@ -181,7 +182,7 @@ class ProductService {
     const result = await model.aggregate([
       { $match: { _id: new mongoose.Types.ObjectId(idProd) } },
       { $unwind: '$store' },
-      { $match: { "store.name": idStore } },
+      { $match: { "store.idStore": idStore } },
       {
         $project: {
           'store.info': {
@@ -205,7 +206,7 @@ class ProductService {
     const result = await model.aggregate([
       { $match: { _id: new mongoose.Types.ObjectId(idProd) } },
       { $unwind: '$store' },
-      { $match: { "store.name": idStore } },
+      { $match: { "store.idStore": idStore } },
       {
         $project: {
           'store.info': {
