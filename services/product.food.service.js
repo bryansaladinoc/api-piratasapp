@@ -1,11 +1,9 @@
 const ProductFood = require('../schemas/product.food.schema');
 
 class ProductService {
-  async find(storeId = '') {
+  async findByStore(storeId) {
     const products = await ProductFood.find({
-      storeId: {
-        $regex: new RegExp(storeId, 'i'),
-      },
+      storeId: storeId,
     }).exec();
 
     return products;

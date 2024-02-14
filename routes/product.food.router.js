@@ -3,10 +3,9 @@ const Router = express.Router();
 const ProductService = require('../services/product.food.service');
 const service = new ProductService();
 
-Router.get('/', async (req, res, next) => {
+Router.get('/by-store/:id', async (req, res, next) => {
   try {
-    const storeId = req.query.storeId;
-    const result = await service.find(storeId);
+    const result = await service.findByStore(req.params.id);
 
     res.status(200).json({ data: result });
   } catch (e) {
