@@ -21,6 +21,15 @@ router.post('/create/store', async (req, res, next) => {
   }
 });
 
+router.post('/create/specific', async (req, res, next) => {
+  try {
+    const response = await service.newSpecific({ ...req.body});
+    res.status(200).json({ data: response }); // REGISTRAR  NUEVA ESPECIFICACION DE UN PRODUCTO
+  } catch (e) {
+    next(e);
+  }
+});
+
 router.get('/', async (req, res, next) => {
   const name = req.query.name;
   try {
@@ -62,6 +71,46 @@ router.get('/find/', async (req, res, next) => {
 });
 
 //FILTERS
+router.get('/fiter/size/', async (req, res, next) => {
+  const idProd = req.query.idProd;
+  const size = req.query.size;
+
+  try {
+    const response = await service.filterBySize(idProd, size); // FILTRO DE TALLA
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.get('/fiter/store/', async (req, res, next) => {
+  const idProd = req.query.idProd;
+  const size = req.query.size;
+  const idStore = req.query.idStore;
+
+  try {
+    const response = await service.filterByStore(idProd, size, idStore); // FILTRO DE TALLA
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.get('/fiter/color/', async (req, res, next) => {
+  const idProd = req.query.idProd;
+  const size = req.query.size;
+  const idStore = req.query.idStore;
+  const color = req.query.color;
+
+  try {
+    const response = await service.filterByColor(idProd, size, idStore, color); // FILTRO DE TALLA
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
+
 router.patch('/update/info/', async (req, res, next) => {
   try {
     const response = await service.generalUpdate({...req.body}); // ACTUALIZA UNA ESPECIFICACION DE UN PRODUCTO
@@ -70,6 +119,30 @@ router.patch('/update/info/', async (req, res, next) => {
     next(e);
   }
 });
+
+router.patch('/update/epecific/', async (req, res, next) => {
+  try {
+    const response = await service.upSpecific({...req.body}); // ACTUALIZA UNA ESPECIFICACION DE UN PRODUCTO
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
+
+router.delete('/delete/specific/', async (req, res, next) => {
+  const idProduct = req.query.idProduct;
+  const idStore = req.query.idStore;
+  const idSpecific = req.query.idSpecific;
+
+  try {
+    const response = await service.delSpecific(idProduct, idStore, idSpecific); // ELIMINA UN PRODUCTO
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
 
 router.delete('/delete/store/', async (req, res, next) => {
   const idProduct = req.query.idProduct;
@@ -85,6 +158,7 @@ router.delete('/delete/store/', async (req, res, next) => {
 
 router.delete('/delete/', async (req, res, next) => {
   const idProduct = req.query.idProduct;
+
   try {
     const response = await service.del(idProduct); // ELIMINA UN PRODUCTO
     res.status(200).json({ data: response });

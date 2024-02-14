@@ -1,16 +1,25 @@
 const mongoose = require('mongoose');
 
-const productSchema = mongoose.Schema(
+const productmSchema = mongoose.Schema(
   {
-    name: String,
+    name: { type: String, unique: true },
     person: String,
     productType: String,
     description: String,
-    image: [{
-      uri: String,
-    }],                
+    image: String,      
     category: String,
+    size: String,
+    priceOld: Number,
+    priceCurrent: Number,
+    exclusive: Boolean,
     sku: { type: String, unique: true },
+    userEdit: {
+      idUser: String,
+      name: String,
+      lastname: String,
+      motherlastname: String,
+      phone: String,
+    },
     store: [
       {
         idStore: String,
@@ -18,27 +27,19 @@ const productSchema = mongoose.Schema(
         location: String,
         latitud: String,
         longitud: String,
-        price: Number,
+        stock: Number,
         createAt: Date, //"2024-02-12T15:30:42.320Z"
-        info: [
-          {
-            color: String,
-            size: String,
-            stock: Number,
-            upAt: Date,
-            userRegister: {
-              idUser: String,
-              name: String,
-              lastname: String,
-              motherlastname: String,
-              phone: String,
-            },
-          },
-        ],
+        userEdit: {
+            idUser: String,
+            name: String,
+            lastname: String,
+            motherlastname: String,
+            phone: String,
+        },
       },
     ],
   },
   { timestamps: true },
 );
 
-module.exports = productSchema;
+module.exports = productmSchema;
