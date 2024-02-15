@@ -5,7 +5,7 @@ const orderSchema = mongoose.Schema(
     deliveryDate: Date,
     status: String,
     deliveryKey: {
-      type: mongoose.Schema.Types.ObjectId, 
+      type: mongoose.Schema.Types.ObjectId,
       default: new mongoose.Types.ObjectId,
     },
     total: Number,
@@ -26,7 +26,7 @@ const orderSchema = mongoose.Schema(
         price: Number,
         subtotal: Number,
         size: String,
-        color: String,
+        //color: String,
         category: String,
         person: String,
         productType: String,

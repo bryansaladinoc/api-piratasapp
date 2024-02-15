@@ -14,7 +14,7 @@ class ProductService {
     const result = await model.updateOne(
       { "_id": data.idProduct },
       { $push: { "store": data.newStore } }
-    ); 
+    );
     return await result;
   }
 
@@ -37,13 +37,15 @@ class ProductService {
           "totalStock": {"$sum": '$store.stock' }, // Suma el stock de todas las especificaciones
           "name": { "$first": '$name' }, // GREGA MAS CAMPOS A LA CONSULTA
           "description": { "$first": '$description' },
-          "person": { "$first": '$person' }, 
-          "price": { "$first": '$store.priceCurrent'},
-          "priceOld": { "$first": '$store.priceOld'},
-          "productType": { "$first": '$productType' },  
-          "image": { "$first": '$image' }, 
-          "category": { "$first": '$category' }, 
-          "sku": { "$first": '$sku' }, 
+          "person": { "$first": '$person' },
+          "price": { "$first": '$priceCurrent'},
+          "priceOld": { "$first": '$priceOld'},
+          "productType": { "$first": '$productType' },
+          "image": { "$first": '$image' },
+          "size": { "$first": '$size' },
+          "exclusive": { "$first": '$exclusive' },
+          "category": { "$first": '$category' },
+          "sku": { "$first": '$sku' },
         }
       }
     ]);
@@ -59,14 +61,16 @@ class ProductService {
         "$group": {
           "_id": '$_id', // Agrupa por el ID del producto
           "totalStock": {"$sum": '$store.stock' }, // Suma el stock de todas las especificaciones
-          "name": { "$first": '$name' }, // AGREGA MAS CAMPOS A LA CONSULTA
-          "description": { "$first": '$description' }, 
-          "person": { "$first": '$person' }, 
-          "price": { "$first": '$store.priceCurrent'},
-          "priceOld": { "$first": '$store.priceOld'},
-          "productType": { "$first": '$productType' }, 
-          "image": { "$first": '$image' }, 
-          "category": { "$first": '$category' }, 
+          "name": { "$first": '$name' }, // GREGA MAS CAMPOS A LA CONSULTA
+          "description": { "$first": '$description' },
+          "person": { "$first": '$person' },
+          "price": { "$first": '$priceCurrent'},
+          "priceOld": { "$first": '$priceOld'},
+          "productType": { "$first": '$productType' },
+          "image": { "$first": '$image' },
+          "size": { "$first": '$size' },
+          "exclusive": { "$first": '$exclusive' },
+          "category": { "$first": '$category' },
           "sku": { "$first": '$sku' },
         }
       }
@@ -97,6 +101,9 @@ class ProductService {
           "category": data.category,
           "size": data.size,
           "userEdit": data.userEdit,
+          "priceOld": data.priceOld,
+          "priceCurrent": data.priceCurrent,
+          "exclusive": data.exclusive,
         }
       });
     return await result;
@@ -110,11 +117,11 @@ class ProductService {
 
   async delOfStore(idProd, idStore) {
     const result = await model.updateOne(
-      { "_id": idProd }, 
-    { $pull: 
-      { "store": { "idStore": idStore } 
+      { "_id": idProd },
+    { $pull:
+      { "store": { "idStore": idStore }
     }});
-    return await result; 
+    return await result;
   }
 }
 
