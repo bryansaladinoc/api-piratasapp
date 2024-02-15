@@ -7,6 +7,12 @@ class StoreFoodService {
     return stores;
   }
 
+  async findOne(id) {
+    const store = await StoreFood.findOne({ _id: id }).exec();
+
+    return store;
+  }
+
   async create(storeData) {
     for (let i = 31; i < 101; i++) {
       const store = new StoreFood({

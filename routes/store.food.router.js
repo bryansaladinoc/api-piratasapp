@@ -12,6 +12,15 @@ Router.get('/', async (req, res, next) => {
   }
 });
 
+Router.get('/:id', async (req, res, next) => {
+  try {
+    const result = await service.findOne(req.params.id);
+    res.status(200).json({ data: result });
+  } catch (e) {
+    next(e);
+  }
+});
+
 Router.post('/', async (req, res, next) => {
   try {
     const result = await service.create(req.body);
