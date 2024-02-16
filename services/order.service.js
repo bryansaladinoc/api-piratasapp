@@ -16,7 +16,15 @@ class OrderService {
   }
 
   async findUser(idUser) {
-    const result = await model.find({ "user.idUser": idUser });
+    const result = await model.find({ "user.idUser": idUser }, {
+      ' _id': 1,
+      'createdAt': 1,
+      'total': 1,
+      'status': 1,
+      'store.name': 1,
+      'deliveryDate': 1,
+      'deliveryKey': 1,
+    });
     return await result;
   }
   

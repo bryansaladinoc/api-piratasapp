@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const OrderService = require('../services/order.service');
 const service = new OrderService();
+const passport = require('passport');
 
 router.post('/create/', async (req, res, next) => {
   try {
@@ -22,8 +23,10 @@ router.get('/find/all', async (req, res, next) => {
 });
 
 
-router.get('/find/user', async (req, res, next) => {
-  const idUser = req.query.idUser;
+router.get('/find/user', 
+passport.authenticate('jwt', { session: false }),
+async (req, res, next) => {
+  const idUser = req.user.sub;
   try {
     const response = await service.findUser(idUser); // ENLISTA TODOS LOS TICKETS
     res.status(200).json({ data: response });

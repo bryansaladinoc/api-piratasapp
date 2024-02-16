@@ -4,10 +4,7 @@ const orderSchema = mongoose.Schema(
   {
     deliveryDate: Date,
     status: String,
-    deliveryKey: {
-      type: mongoose.Schema.Types.ObjectId,
-      default: new mongoose.Types.ObjectId,
-    },
+    deliveryKey: String,
     total: Number,
     store: {
       idStore: String,
@@ -18,7 +15,7 @@ const orderSchema = mongoose.Schema(
     },
     products: [
       {
-        idProducto: String,
+        idProduct: String,
         name: String,
         sku: String,
         description: String,
@@ -38,6 +35,12 @@ const orderSchema = mongoose.Schema(
       lastname: String,
       motherLastname: String,
       phone: String,
+      phonecode: {
+        code: String,
+        dial_code: String,
+        flag: String,
+        name: String,
+      },
     },
   },
   { timestamps: true },
