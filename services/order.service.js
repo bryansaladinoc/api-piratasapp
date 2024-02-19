@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const boom = require('@hapi/boom');
 const orderSchema = require('../schemas/order.schema');
 const model = mongoose.model('order', orderSchema);
+const schedule = require('node-schedule');
 
 class OrderService {
   async newOrder(data) {
@@ -24,10 +25,10 @@ class OrderService {
       'store.name': 1,
       'deliveryDate': 1,
       'deliveryKey': 1,
-    });
+    }).sort({ createdAt: -1 });
     return await result;
   }
-  
+
   async find(idOrder) {
     const result = await model.findOne({ "_id": idOrder });
     return await result;
@@ -44,7 +45,32 @@ class OrderService {
 
     return await result;
   }
-
 }
+
+async function upDateStatusDelivery() {
+  try {
+    const currentDate = new Date();
+
+    const ordersCancel = await model.find({
+      deliveryDate: { $lte: currentDate },
+      status: { $ne: 'Cancelado' }, // No actualizar órdenes canceladas
+    });
+
+    for (const orden of ordersCancel) {
+      orden.status = 'Cancelado'; // Actualizar el estado según tus necesidades
+      await orden.save();
+    }
+
+    //console.log('Estados de órdenes vencidas actualizados.');
+    console.log(currentDate);
+  } catch (error) {
+    console.error('Error al actualizar estados de órdenes vencidas:', error);
+  }
+}
+
+// Programar la tarea para que se ejecute diariamente
+schedule.scheduleJob('0 0 * * *', () => {
+  upDateStatusDelivery();
+});
 
 module.exports = OrderService;
