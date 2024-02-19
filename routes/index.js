@@ -9,6 +9,7 @@ const playerRouter = require('./roster.router');
 const postalCodeRouter = require('./postalCode.router');
 const storeFoodRouter = require('./store.food.router');
 const productFoodRouter = require('./product.food.router');
+const orderFoodRouter = require('./order.food.router');
 
 const routerApi = (app) => {
   app.use('/api/v1', router);
@@ -33,6 +34,11 @@ const routerApi = (app) => {
     '/products-food',
     passport.authenticate('jwt', { session: false }),
     productFoodRouter,
+  );
+  router.use(
+    '/orders-food',
+    passport.authenticate('jwt', { session: false }),
+    orderFoodRouter,
   );
   router.use('/postal-codes', postalCodeRouter);
 };
