@@ -19,7 +19,45 @@ class ProductService {
   }
 
   async find(idProd) {
-    const result = await model.findOne({ "_id": idProd });
+    //const result = await model.findOne({ "_id": idProd });
+    const result = await model.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idProd), // Convertir el ID a un objeto ObjectId
+          'store': {
+            $elemMatch: {
+              'stock': { $ne: 0 }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          person: 1,
+          productType: 1,
+          description: 1,
+          image: 1,      
+          category: 1,
+          size: 1,
+          priceOld: 1,
+          priceCurrent: 1,
+          exclusive: 1,
+          sku: 1,
+          userEdit: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          store: {
+            $filter: {
+              input: '$store',
+              as: 'storeItem',
+              cond: { $ne: ['$$storeItem.stock', 0] }
+            }
+          }
+        }
+      }
+    ]);
+
     return await result;
   }
 
@@ -72,6 +110,11 @@ class ProductService {
           "exclusive": { "$first": '$exclusive' },
           "category": { "$first": '$category' },
           "sku": { "$first": '$sku' },
+        }
+      },
+      {
+        "$match": {
+          "totalStock": { "$ne": 0 } // Excluye productos con suma de stock igual a 0
         }
       }
     ]);

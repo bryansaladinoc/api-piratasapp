@@ -8,6 +8,7 @@ class OrderService {
   async newOrder(data) {
     const result = await new model({ ...data });
     await result.save();
+    
     return await result;
   }
 
