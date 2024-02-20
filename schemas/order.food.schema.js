@@ -15,6 +15,7 @@ const OrderFoodSchema = new mongoose.Schema(
         image: String,
         price: Number,
         quantity: Number,
+        comment: String,
         storeId: String,
         title: String,
       },
