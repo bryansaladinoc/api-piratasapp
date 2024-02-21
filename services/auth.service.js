@@ -95,7 +95,7 @@ class AuthService {
           motherlastname: data.motherlastname,
           email: data.email,
           phonecode: data.phonecode,
-          phone: data.phone,
+          //phone: data.phone,
           country: data.country,
           state: data.state,
           city: data.city,

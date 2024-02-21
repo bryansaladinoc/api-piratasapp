@@ -37,7 +37,7 @@ class ProductService {
           person: 1,
           productType: 1,
           description: 1,
-          image: 1,      
+          image: 1,
           category: 1,
           size: 1,
           priceOld: 1,
@@ -108,16 +108,19 @@ class ProductService {
           "image": { "$first": '$image' },
           "size": { "$first": '$size' },
           "exclusive": { "$first": '$exclusive' },
+          "status": { "$first": '$status' },
           "category": { "$first": '$category' },
           "sku": { "$first": '$sku' },
         }
       },
       {
         "$match": {
-          "totalStock": { "$ne": 0 } // Excluye productos con suma de stock igual a 0
+          "totalStock": { "$ne": 0 }, // Excluye productos con suma de stock igual a 0
+          "status": { "$ne": false },
         }
       }
     ]);
+    //console.log(result.length)
     return await result;
   }
 
@@ -147,6 +150,7 @@ class ProductService {
           "priceOld": data.priceOld,
           "priceCurrent": data.priceCurrent,
           "exclusive": data.exclusive,
+          "status": data.status,
         }
       });
     return await result;
