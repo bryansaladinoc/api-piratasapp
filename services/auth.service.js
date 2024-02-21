@@ -42,21 +42,21 @@ class AuthService {
     try {
       //VALIDA EL USUARIO
       const user = await User.findOne({
-        _id: idUser
+        _id: idUser,
       }).exec();
 
       //COMPARA LA CONTRASEÑA ENCRIPTADA
       //const passCompare = await bcrypt.compare(data.currentPass, user.password);
 
-      if(user){
+      if (user) {
         //ENCRIPTACION DE CONTRASEÑÁ
         //const saltRounds = 10;
         //const hashPass = await bcrypt.hash(data.newPass, saltRounds);
 
-        await User.updateOne({ _id: idUser }, { password: hashPass });
+        await User.updateOne({ _id: idUser }, { password: data.newPass }); // CAMBIAR POR hashPass
         await session.commitTransaction();
         return true;
-    }
+      }
       await session.commitTransaction();
       return false;
     } catch (err) {
