@@ -157,6 +157,29 @@ class AuthService {
       await session.endSession();
     }
   }
+
+  async upDatePhone (idUser, phone) {
+    const session = await User.startSession();
+    await session.startTransaction();
+    try {
+      await User.updateOne(
+        { _id: idUser },
+        {
+          phone: phone,
+        },
+        { session },
+      );
+      await session.commitTransaction();
+      return true;
+    } catch (err) {
+      await session.abortTransaction();
+      console.log(err);
+      return fasle;
+    } finally {
+      await session.endSession();
+    }
+  }
+
 }
 
 module.exports = AuthService;

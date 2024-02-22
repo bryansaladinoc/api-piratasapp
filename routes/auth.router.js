@@ -66,6 +66,20 @@ router.patch(
   },
 );
 
+router.patch(
+  '/user/phone',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    const { phone } = req.body;
+    try {
+      const result = await service.upDatePhone(req.user.sub, phone);
+      return res.status(201).json({ result });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
 router.get(
   '/user/getid',
   passport.authenticate('jwt', { session: false }),

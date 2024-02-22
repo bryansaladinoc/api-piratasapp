@@ -47,6 +47,7 @@ class ProductService {
           userEdit: 1,
           createdAt: 1,
           updatedAt: 1,
+          status: 1,
           store: {
             $filter: {
               input: '$store',
@@ -120,7 +121,7 @@ class ProductService {
         }
       }
     ]);
-    //console.log(result.length)
+    console.log(result.length)
     return await result;
   }
 
