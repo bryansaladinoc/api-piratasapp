@@ -26,8 +26,8 @@ class PostService {
         }
       },
       {$sort: { createdAt: -1 }},
-      { $skip: (page - 1) * 7},
-      { $limit: 7 }
+      { $skip: (page - 1) * 30},
+      { $limit: 30 }
     ]);
 
     return await result;
@@ -149,6 +149,13 @@ class PostService {
       .slice((page - 1) * 5, page * 6);
     return await commentsPage;
   }
+
+  async updateImagePosts (image) {
+    const result = await postModel.updateMany({}, { $set: { "imageContent" : image } });
+    return await result;
+  }
+
+
 }
 
 

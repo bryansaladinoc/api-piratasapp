@@ -120,4 +120,14 @@ router.delete('/deletepost/:id', async (req, res, next) => {
   }
 });
 
+router.patch('/upImage', async (req, res, next) => {
+  const {image} = req.body;
+  try {
+    const response = await service.updateImagePosts(image); // BUSCA POST POR ID
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
 module.exports = router;
