@@ -6,12 +6,12 @@ const postModel = mongoose.model('posts', postSchema);
 class PostService {
   async findAllPost(page) {
     const result = await postModel.aggregate([
-      /* {
+      {
         "$match": {
-          "user.status": false // Condición para campo1
+          "user.status": true // Condición para campo1
           // Puedes agregar otras condiciones aquí
         },
-      }, */
+      },
       {
         "$project": {
           "user": 1,

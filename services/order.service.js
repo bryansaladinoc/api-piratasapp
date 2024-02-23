@@ -1,17 +1,48 @@
 const mongoose = require('mongoose');
 const boom = require('@hapi/boom');
 const orderSchema = require('../schemas/order.schema');
+const productSchema = require('../schemas/product.schema');
 const model = mongoose.model('order', orderSchema);
+const productModel = mongoose.model('product', productSchema);
 const schedule = require('node-schedule');
 
 class OrderService {
   async newOrder(data) {
-    const result = await new model({ ...data });
-    await result.save();
-    
-    return await result;
-  }
+    const session = await model.startSession();
+    await session.startTransaction();
+    try {
+      const order = await new model({ ...data });
+      await order.save();
+      await session.commitTransaction();
+      const idStore = data.store.idStore;
+      for (const product of data.products) {
+        const idProduct = product.idProduct;
+        const amount = product.amount;
+        //BUSCAR STOCK
+        const findStock = await productModel.findOne(
+          { '_id': idProduct, 'store.idStore': idStore },
+          { 'store.$': 1 }
+        );
+        
+        //SI NO HAY STOCK
+        if (findStock.store[0].stock < amount) {
+          throw boom.badRequest('No hay suficiente stock');
+        } else {
+          await productModel.updateOne(
+            { '_id': idProduct, 'store.idStore': idStore },
+            { $inc: { 'store.$.stock': -amount } }
+          );
+        }
+      }
 
+      session.endSession();
+      return order;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw boom.badRequest(error);
+    }
+  }
   async findAll() {
     const result = await model.find();
     return await result;
