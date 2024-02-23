@@ -9,7 +9,7 @@ const postSchema = mongoose.Schema({
         motherlastname: String,
         imageUserUri: String,
         rol: String,
-        status: Number
+        status: Boolean
     },
     content: String,
     contentType: String,
@@ -23,7 +23,7 @@ const postSchema = mongoose.Schema({
             motherlastname: String,
             imageUserUri: String,
             rol: String,
-            userStatus: Number,
+            userStatus: Boolean,
             comment: String,
             createdAt: Date
         }

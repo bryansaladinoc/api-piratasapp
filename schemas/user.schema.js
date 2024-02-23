@@ -22,7 +22,11 @@ const userSchema = mongoose.Schema(
     age: Number,
     image: String,
     rol: String,
-    status: Number,
+    status: {
+      store: Boolean,
+      food: Boolean,
+      posts: Boolean,
+    }
   },
   { timestamps: true },
 );

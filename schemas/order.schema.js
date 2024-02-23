@@ -4,6 +4,7 @@ const orderSchema = mongoose.Schema(
   {
     deliveryDate: Date,
     status: String,
+    statusNote: String,
     deliveryKey: String,
     total: Number,
     store: {

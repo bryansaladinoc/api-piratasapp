@@ -12,11 +12,11 @@ const postModel = mongoose.model('posts', postSchema);
 class AuthService {
   async login(phone, password) {
     const user = await User.findOne({
-      phone,
-      password,
+      phone
     }).exec();
+    const match = await bcrypt.compare(password, user.password);
 
-    if (!user) {
+    if (!user && !match) {
       throw boom.unauthorized();
     }
 
@@ -28,8 +28,14 @@ class AuthService {
   }
 
   async store(userData) {
+    userData.password = await bcrypt.hash(userData.password, 10);
+    userData.status = {
+      store: true,
+      food: true,
+      posts: true,
+    };
+    console.log(userData);
     const user = new User({ ...userData });
-
     await user.save();
 
     return user;
@@ -46,14 +52,14 @@ class AuthService {
       }).exec();
 
       //COMPARA LA CONTRASEÑA ENCRIPTADA
-      //const passCompare = await bcrypt.compare(data.currentPass, user.password);
 
-      if (user) {
+      const passCompare = await bcrypt.compare(data.currentPass, user.password);
+      if (user && passCompare) {
         //ENCRIPTACION DE CONTRASEÑÁ
-        //const saltRounds = 10;
-        //const hashPass = await bcrypt.hash(data.newPass, saltRounds);
+        const saltRounds = 10;
+        const hashPass = await bcrypt.hash(data.newPass, saltRounds);
 
-        await User.updateOne({ _id: idUser }, { password: data.newPass }); // CAMBIAR POR hashPass
+        await User.updateOne({ _id: idUser }, { password: hashPass }); // CAMBIAR POR hashPass
         await session.commitTransaction();
         return true;
       }
@@ -73,8 +79,6 @@ class AuthService {
     return user;
   }
 
-  // USO DE TRANSACCIONES, RECORDAR CONFIGURAR EL .ENV PARA UTILIZAR ESTA FUNCIONALIDAD
-  // ADEMAS DE REALIZAR LA REPLICA DE DATOS EN MONGO
   // EL SIGUIENTE METODO ACTUALIZA LOS POSTS Y LOS COMENTARIOS DESPUES DE ACTUALIZAR LA INFOMACIÓN DEL USUARIO
   async updateUser(idUser, data) {
     //const validarDatos = validarUsuario();
@@ -103,7 +107,11 @@ class AuthService {
           age: data.age,
           image: data.image,
           rol: data.rol,
-          status: data.status,
+          /* status: {
+            store: true,
+            food: true,
+            posts: true,
+          } */
         },
         { session },
       );
@@ -118,7 +126,7 @@ class AuthService {
           'user.motherlastname': data.motherlastname,
           'user.imageUserUri': data.image,
           'user.rol': data.rol,
-          'user.status': data.status,
+          //'user.status': false,
         },
         { session },
       );
@@ -132,7 +140,7 @@ class AuthService {
           'comments.$[element].motherlastname': data.motherlastname,
           'comments.$[element].imageUserUri': data.image,
           'comments.$[element].rol': data.rol,
-          'comments.$[element].userStatus': data.status,
+          //'comments.$[element].userStatus': false,
         },
       };
 
