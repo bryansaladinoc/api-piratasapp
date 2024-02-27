@@ -5,6 +5,13 @@ const orderSchema = mongoose.Schema(
     deliveryDate: Date,
     status: String,
     statusNote: String,
+    userEdit: {
+      idUser: String,
+      name: String,
+      lastname: String,
+      motherLastname: String,
+      phone: String,
+    },
     deliveryKey: String,
     total: Number,
     store: {

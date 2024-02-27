@@ -1,16 +1,31 @@
 const mongoose = require('mongoose');
+const schedule = require('node-schedule');
 const boom = require('@hapi/boom');
 const orderSchema = require('../schemas/order.schema');
 const productSchema = require('../schemas/product.schema');
+
 const model = mongoose.model('order', orderSchema);
+const userModel = require('../schemas/user.schema');
 const productModel = mongoose.model('product', productSchema);
-const schedule = require('node-schedule');
 
 class OrderService {
   async newOrder(data) {
+    data.status = 'Pendiente';
+    data.statusNote = 'Creada por el usuario';
+    
     const session = await model.startSession();
     await session.startTransaction();
     try {
+      const user = await userModel.findOne({ '_id': data.user.idUser });
+      data.userEdit = {
+        idUser: user._id,
+        name: user.name,
+        lastname: user.lastname,
+        motherLastname: user.motherlastname,
+        phone: user.phone
+      };
+      
+    
       const order = await new model({ ...data });
       await order.save();
       await session.commitTransaction();
