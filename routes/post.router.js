@@ -26,18 +26,20 @@ router.post('/newpost', async (req, res, next) => {
 
 //LIKES
 router.post('/likepost', async (req, res, next) => {
+  const idUser = req.user.sub;
   try {
-    const response = await service.likePostByUser({ ...req.body }); //AÑADE EL LIKE DEL USUARIO
+    const response = await service.likePostByUser({ ...req.body }, idUser); //AÑADE EL LIKE DEL USUARIO
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
   }
 });
 
-router.delete('/likepost/:idpost/:iduser', async (req, res, next) => {
-  const { idpost,  iduser} = req.params;
+router.delete('/likepost/:idpost', async (req, res, next) => {
+  const idUser = req.user.sub;
+  const { idpost } = req.params;
   try {
-    const response = await service.deleteLikePostByUser(idpost,iduser); // ELIMINA EL LIKE DEL USUARIO
+    const response = await service.deleteLikePostByUser(idpost, idUser); // ELIMINA EL LIKE DEL USUARIO
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);

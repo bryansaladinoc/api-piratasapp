@@ -114,14 +114,17 @@ class PostService {
         }
       },
       {$sort: { createdAt: -1 }},
-      { $skip: (page - 1) * 7},
-      { $limit: 7 }
+      { $skip: (page - 1) * 30},
+      { $limit: 30 }
     ]);
 
     return await result;
   }
 
-  async likePostByUser(dataPost) {
+  async likePostByUser(dataPost, idUser) {
+    dataPost.likes= {
+      idUser: idUser,
+    };
     const result = await postModel.updateMany({ "_id": dataPost.idPost }, { $push: { 'likes': dataPost.likes } });
     return await result;
   }
