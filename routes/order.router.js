@@ -14,6 +14,8 @@ router.post('/create/', async (req, res, next) => {
 });
 
 router.get('/find/all', async (req, res, next) => {
+  /* const idUser = req.user.sub;
+  console.log(idUser); */
   try {
     const response = await service.findAll(); // ENLISTA TODOS LOS TICKETS
     res.status(200).json({ data: response });
@@ -24,7 +26,6 @@ router.get('/find/all', async (req, res, next) => {
 
 
 router.get('/find/user', 
-passport.authenticate('jwt', { session: false }),
 async (req, res, next) => {
   const idUser = req.user.sub;
   try {
@@ -46,8 +47,9 @@ router.get('/find/', async (req, res, next) => {
 });
 
 router.patch('/update/status', async (req, res, next) => {
+  const idUser = req.user.sub;
   try {
-    const response = await service.updateStatus({...req.body}); // ENLISTA TODOS LOS TICKETS
+    const response = await service.updateStatus({...req.body}, idUser); // ENLISTA TODOS LOS TICKETS
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);

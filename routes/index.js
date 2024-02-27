@@ -19,8 +19,13 @@ const routerApi = (app) => {
     postsRouter
   );
   
+  router.use(
+    '/order', 
+    passport.authenticate('jwt', { session: false }),
+    orderRouter
+  );
+
   router.use('/store', storeRouter);
-  router.use('/order', orderRouter);
   router.use('/product', productRouter);
   router.use('/auth', authRouter);
   

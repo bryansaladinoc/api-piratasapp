@@ -12,7 +12,7 @@ class OrderService {
   async newOrder(data) {
     data.status = 'Pendiente';
     data.statusNote = 'Creada por el usuario';
-    
+
     const session = await model.startSession();
     await session.startTransaction();
     try {
@@ -24,11 +24,11 @@ class OrderService {
         motherLastname: user.motherlastname,
         phone: user.phone
       };
-      
-    
+
+
       const order = await new model({ ...data });
       await order.save();
-      await session.commitTransaction();
+      
       const idStore = data.store.idStore;
       for (const product of data.products) {
         const idProduct = product.idProduct;
@@ -38,7 +38,7 @@ class OrderService {
           { '_id': idProduct, 'store.idStore': idStore },
           { 'store.$': 1 }
         );
-        
+
         //SI NO HAY STOCK
         if (findStock.store[0].stock < amount) {
           throw boom.badRequest('No hay suficiente stock');
@@ -50,6 +50,7 @@ class OrderService {
         }
       }
 
+      await session.commitTransaction();
       session.endSession();
       return order;
     } catch (error) {
@@ -59,7 +60,16 @@ class OrderService {
     }
   }
   async findAll() {
-    const result = await model.find();
+    const result = await model.find({}, {
+      ' _id': 1,
+      'deliveryDate': 1,
+      'status': 1,
+      'total': 1,
+      'store': 1,
+      'user': 1,
+      'createdAt': 1,
+      'updatedAt': 1,
+    }).sort({ createdAt: -1 });
     return await result;
   }
 
@@ -81,16 +91,42 @@ class OrderService {
     return await result;
   }
 
-  async updateStatus(data) {
+  async updateStatus(data, userLogged) {
     const idOrder = data.idOrder;
     const status = data.status;
+    const statusNote = data.statusNote;
 
-    const result = await model.updateOne(
-      { "_id": idOrder },
-      { $set: { "status": status } }
-    );
+    const session = await model.startSession();
+    await session.startTransaction();
+    try {
+      const user = await userModel.findOne({ '_id': userLogged });
+      const userEdit = {
+        idUser: user._id,
+        name: user.name,
+        lastname: user.lastname,
+        motherLastname: user.motherlastname,
+        phone: user.phone
+      };
 
-    return await result;
+      const result = await model.updateOne(
+        { "_id": idOrder },
+        {
+          $set: {
+            "status": status,
+            "statusNote": statusNote,
+            "userEdit": userEdit
+          }
+        }
+      );
+
+      await session.commitTransaction();
+      session.endSession();
+      return result;
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw boom.badRequest(error);
+    }
   }
 }
 
