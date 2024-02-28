@@ -3,6 +3,7 @@ const schedule = require('node-schedule');
 const boom = require('@hapi/boom');
 const orderSchema = require('../schemas/order.schema');
 const productSchema = require('../schemas/product.schema');
+const { encrypt, decrypt } = require('../utils/crypt/index');
 
 const model = mongoose.model('order', orderSchema);
 const userModel = require('../schemas/user.schema');
@@ -11,7 +12,11 @@ const productModel = mongoose.model('product', productSchema);
 class OrderService {
   async newOrder(data) {
     data.status = 'Pendiente';
-    data.statusNote = 'Creada por el usuario';
+    data.statusNote = 'Pendiente de confirmación';
+    console.log(data.deliveryKey);
+
+    const deliveryKeyEncrypted = encrypt(data.deliveryKey);
+    data.deliveryKey = JSON.stringify(deliveryKeyEncrypted);
 
     const session = await model.startSession();
     await session.startTransaction();
@@ -28,7 +33,7 @@ class OrderService {
 
       const order = await new model({ ...data });
       await order.save();
-      
+
       const idStore = data.store.idStore;
       for (const product of data.products) {
         const idProduct = product.idProduct;
@@ -41,7 +46,7 @@ class OrderService {
 
         //SI NO HAY STOCK
         if (findStock.store[0].stock < amount) {
-          throw boom.badRequest('No hay suficiente stock');
+          throw new Error('No hay suficiente stock');
         } else {
           await productModel.updateOne(
             { '_id': idProduct, 'store.idStore': idStore },
@@ -54,11 +59,13 @@ class OrderService {
       session.endSession();
       return order;
     } catch (error) {
+      console.log(error);
       await session.abortTransaction();
       session.endSession();
       throw boom.badRequest(error);
     }
   }
+
   async findAll() {
     const result = await model.find({}, {
       ' _id': 1,
@@ -74,7 +81,7 @@ class OrderService {
   }
 
   async findUser(idUser) {
-    const result = await model.find({ "user.idUser": idUser }, {
+    let result = await model.find({ "user.idUser": idUser }, {
       ' _id': 1,
       'createdAt': 1,
       'total': 1,
@@ -83,15 +90,41 @@ class OrderService {
       'deliveryDate': 1,
       'deliveryKey': 1,
     }).sort({ createdAt: -1 });
-    return await result;
+  
+    result = result.map(item => {
+      const deliveryKeyObject = JSON.parse(item.deliveryKey);
+      item.deliveryKey = decrypt(deliveryKeyObject);
+      return item;
+    });
+
+    return result;
   }
 
   async find(idOrder) {
     const result = await model.findOne({ "_id": idOrder });
+    const deliveryKeyObject = JSON.parse(result.deliveryKey);
+    result.deliveryKey = decrypt(deliveryKeyObject);
     return await result;
   }
 
   async updateStatus(data, userLogged) {
+    if (data.status === 'Cancelado por cliente') {
+      data.statusNote = 'Cancelado por el cliente';
+
+    } else if (data.status === 'Cancelado sin confirmación') {
+      data.statusNote = 'El vendedor no confirmó la orden';
+
+    } else if (data.status === 'Cancelado sin entrega') {
+      data.statusNote = 'El cliente no recogio el producto';
+
+    } else if (data.status === 'Entregado') {
+      data.statusNote = 'Pedido entregado al cliente';
+
+    } else if (data.status === 'En curso') {
+      data.statusNote = 'Pedido confirmado';
+
+    }
+
     const idOrder = data.idOrder;
     const status = data.status;
     const statusNote = data.statusNote;
@@ -140,6 +173,7 @@ async function upDateStatusDelivery() {
     });
 
     for (const orden of ordersCancel) {
+      console.log('Orden vencida:', orden._id);
       orden.status = 'Cancelado'; // Actualizar el estado según tus necesidades
       await orden.save();
     }

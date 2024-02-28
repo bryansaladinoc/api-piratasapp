@@ -150,7 +150,7 @@ class PostService {
 
       const commentsPage = result.comments
       .sort((a, b) => b.createdAt - a.createdAt) // Ordena por fecha en orden descendente (más reciente primero)
-      .slice((page - 1) * 5, page * 6);
+      .slice((page - 1) * 5, page * 5);
     return await commentsPage;
   }
 

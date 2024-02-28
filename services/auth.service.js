@@ -166,7 +166,7 @@ class AuthService {
     }
   }
 
-  async upDatePhone (idUser, phone) {
+  async upDatePhone(idUser, phone) {
     const session = await User.startSession();
     await session.startTransaction();
     try {
@@ -187,6 +187,70 @@ class AuthService {
       await session.endSession();
     }
   }
+
+  async userValidate(idUser) {
+    const user = await User.findOne({ _id: idUser }).exec();
+    const data = {
+      status: user.status,
+      name: user.name,
+      rol: user.rol
+    };
+    return data;
+  }
+
+  async userStatusPosts(idUser, status) {
+    const session = await User.startSession();
+    await session.startTransaction();
+    try {
+      await User.updateOne(
+        { _id: idUser },
+        {
+          'status.posts': status,
+        },
+        { session },
+      );
+
+      // ACTUALIZA LA INFORMACION DEL USARIO EN TODOS LOS POST QUE EL HAYA REALIZADO
+      const filterPost = { 'user.idUser': idUser };
+      const updatePost = await postModel.updateMany(
+        filterPost,
+        {
+          'user.status': status,
+        },
+        { session },
+      );
+
+      // ACTUALIZA TODOS LOS  COMENTARIOS QUE EL USUARIO HAYA REALIZADO EN TODOS LOS POSTS
+      const filterComment = { 'comments.idUser': idUser }; // CONDICION PARA EL QUERY
+      const actualizacion = {
+        $set: {
+          'comments.$[element].userStatus': status,
+        },
+      };
+
+      const opciones = {
+        session: session,
+        arrayFilters: [{ 'element.idUser': idUser }], // CONDICION PARA EL ARREGLO
+        multi: true, // IMPORTANTE
+      };
+      
+      const queryD = await postModel.updateMany(
+        filterComment,
+        actualizacion,
+        opciones,
+      );
+
+      await session.commitTransaction();
+      return true;
+    } catch (err) {
+      await session.abortTransaction();
+      console.log(err);
+      return fasle;
+    } finally {
+      await session.endSession();
+    }
+  }
+
 
 }
 

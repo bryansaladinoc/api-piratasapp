@@ -5,6 +5,7 @@ const orderSchema = mongoose.Schema(
     deliveryDate: Date,
     status: String,
     statusNote: String,
+    confirmationDate: Date,
     userEdit: {
       idUser: String,
       name: String,

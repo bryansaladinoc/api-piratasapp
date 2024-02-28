@@ -52,6 +52,22 @@ router.patch(
 );
 
 router.patch(
+  '/user/update/statusPosts',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    const { status } = req.body;
+    const {idUser} = req.body;
+    console.log(req.body);
+    try {
+      const result = await service.userStatusPosts(idUser, status);
+      return res.status(201).json({ result });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+router.patch(
   '/user/password',
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
@@ -85,7 +101,13 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
     try {
-      const data = req.user.sub;
+      const result = await service.userValidate(req.user.sub);
+      const data= {
+        idUser: req.user.sub,
+        status: result.status,
+        rol: result.rol
+      }
+
       return res.status(201).json({ data });
     } catch (e) {
       next(e);

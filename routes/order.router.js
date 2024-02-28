@@ -14,8 +14,6 @@ router.post('/create/', async (req, res, next) => {
 });
 
 router.get('/find/all', async (req, res, next) => {
-  /* const idUser = req.user.sub;
-  console.log(idUser); */
   try {
     const response = await service.findAll(); // ENLISTA TODOS LOS TICKETS
     res.status(200).json({ data: response });
