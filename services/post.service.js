@@ -85,6 +85,11 @@ class PostService {
         }
       }
     ]);
+    console.log(result);
+    if(result.length === 0) {
+      throw boom.notFound('Post not found');
+    }
+
     return await result;
   }
 
