@@ -33,6 +33,35 @@ class PostService {
     return await result;
   }
 
+  async findLastPostUser (idUser) {
+    const result = await postModel.aggregate([
+      {
+        "$match": {
+          "user.idUser": idUser // Condición para campo1
+          // Puedes agregar otras condiciones aquí
+        },
+      },
+      {
+        "$project": {
+          "user": 1,
+          "_id": 1,
+          "content": 1,
+          "contentType": 1,
+          "imageContent": 1,
+          "likes": 1,
+          "createdAt": 1,
+          "countLikes": { "$size": '$likes' },
+          "countComments": { "$size": '$comments' }
+        }
+      },
+      {$sort: { createdAt: -1 }},
+      { $limit: 1 }
+    ]);
+
+    return await result;
+  }
+
+
   async findPost(idPost) {
    // const result = await postModel.findOne({ "_id": idPost}).exec();
     const result = await postModel.aggregate([
@@ -51,8 +80,8 @@ class PostService {
           "imageContent": 1,
           // "likes": 1,
           "createdAt": 1,
-          // "countLikes": { "$size": '$likes' },
-          // "countComments": { "$size": '$comments' }
+          "countLikes": { "$size": '$likes' },
+          "countComments": { "$size": '$comments' }
         }
       }
     ]);

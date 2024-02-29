@@ -15,6 +15,16 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+router.get('/lastPost', async (req, res, next) => {
+  const idUser = req.user.sub;
+  try {
+    const response = await service.findLastPostUser(idUser); // ENLISTA TODOS LOS POST
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
 router.post('/newpost', async (req, res, next) => {
   try {
     const response = await service.createPost({ ...req.body }); // AÑADE UN NUEVO POST
