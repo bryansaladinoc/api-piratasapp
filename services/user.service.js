@@ -8,7 +8,7 @@ const User = require('../schemas/user.schema');
 const postSchema = require('../schemas/post.schema');
 const postModel = mongoose.model('posts', postSchema);
 
-class AuthService {
+class UserService {
   async login(phone, password) {
     const user = await User.findOne({
       phone,
@@ -32,6 +32,15 @@ class AuthService {
     await user.save();
 
     return user;
+  }
+
+  async find() {
+    return await User.find().populate('roles').exec();
+  }
+
+  // Sustituye a selectUser ya tiene el populate
+  async getProfile(id) {
+    return await User.findOne({ _id: id }).populate('roles').exec();
   }
 
   // ACTUALIZAR CONTRASEÑA DEL USUARIO
@@ -152,4 +161,4 @@ class AuthService {
   }
 }
 
-module.exports = AuthService;
+module.exports = UserService;

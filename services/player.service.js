@@ -5,13 +5,15 @@ class PlayerService {
   async find(type = '') {
     const player = await Player.find({
       type: { $regex: new RegExp(type, 'i') },
-    }).exec();
+    })
+      .populate('country')
+      .exec();
 
     return player;
   }
 
   async findOne(id) {
-    const player = await Player.findOne({ _id: id }).exec();
+    const player = await Player.findOne({ _id: id }).populate('country').exec();
 
     if (!player) {
       throw boom.notFound();

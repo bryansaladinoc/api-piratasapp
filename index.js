@@ -14,6 +14,7 @@ require('./utils/auth');
 
 app.use(cors());
 app.use(express.json({ limit: '1000mb' }));
+// app.use(express.urlencoded({ extended: true, limit: '1000mb' }));
 
 app.get('/', (req, res) => {
   res.json('Hi Filibustero');

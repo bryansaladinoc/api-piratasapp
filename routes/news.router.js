@@ -24,7 +24,10 @@ router.get('/:id', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    const result = await service.create({ ...req.body });
+    const result = await service.create({
+      ...req.body,
+      createBy: req.user.sub,
+    });
     res.status(201).json({ data: result });
   } catch (e) {
     next(e);

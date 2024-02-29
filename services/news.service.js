@@ -3,7 +3,7 @@ const News = require('../schemas/news.schema');
 
 class NewsService {
   async find() {
-    const news = await News.find().exec();
+    const news = await News.find().populate('createBy').exec();
 
     return news;
   }

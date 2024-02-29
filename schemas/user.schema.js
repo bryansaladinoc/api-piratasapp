@@ -21,8 +21,14 @@ const userSchema = mongoose.Schema(
     sex: String,
     age: Number,
     image: String,
-    rol: String,
-    status: Number,
+    role: [{ type: mongoose.Schema.Types.ObjectId, ref: 'roles' }],
+    status: [
+      {
+        name: String,
+        value: Boolean,
+        userEdit: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+      },
+    ],
   },
   { timestamps: true },
 );

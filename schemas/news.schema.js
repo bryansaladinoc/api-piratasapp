@@ -4,9 +4,8 @@ const newsSchema = mongoose.Schema(
   {
     title: String,
     article: String,
-    createBy: String,
+    createBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
     author: String,
-    // createdAt: String,
     updatedAt: String,
     imageUri: String,
   },

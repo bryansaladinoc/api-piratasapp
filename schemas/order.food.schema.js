@@ -26,10 +26,11 @@ const OrderFoodSchema = new mongoose.Schema(
     section: { type: Number, required: true },
     storeId: { type: String, required: true },
     status: { type: String, required: true },
+    subtotalPayment: Number,
     totalPayment: { type: Number, required: true },
     userId: { type: String, required: true },
     securityCode: { type: String, required: true },
-    payment: { type: String, required: true },
+    payment: { type: String },
   },
   {
     timestamps: true,
