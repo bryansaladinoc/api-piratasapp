@@ -206,16 +206,6 @@ class UserService {
     }
   }
 
-  async userValidate(idUser) {
-    const user = await User.findOne({ _id: idUser }).exec();
-    const data = {
-      status: user.status,
-      name: user.name,
-      rol: user.rol,
-    };
-    return data;
-  }
-
   async userStatusPosts(idUser, status) {
     const session = await User.startSession();
     await session.startTransaction();
