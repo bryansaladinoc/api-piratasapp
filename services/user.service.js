@@ -12,7 +12,7 @@ const postModel = mongoose.model('posts', postSchema);
 class UserService {
   async login(phone, password) {
     const user = await User.findOne({
-      phone
+      phone,
     }).exec();
     const match = await bcrypt.compare(password, user.password);
 
@@ -29,12 +29,12 @@ class UserService {
 
   async store(userData) {
     userData.password = await bcrypt.hash(userData.password, 10);
-    userData.status = {
-      store: true,
-      food: true,
-      posts: true,
-    };
-    console.log(userData);
+    // Example Status {
+    //   name: 'store',
+    //   value: false,
+    //   userEdit,
+    // }
+    // userData.status = [];
     const user = new User({ ...userData });
     await user.save();
 
@@ -47,7 +47,16 @@ class UserService {
 
   // Sustituye a selectUser ya tiene el populate
   async getProfile(id) {
-    return await User.findOne({ _id: id }).populate('roles').exec();
+    return await User.findOne({ _id: id })
+      .populate({
+        path: 'roles',
+        model: 'roles',
+        populate: {
+          path: 'permissions',
+          model: 'permissions',
+        },
+      })
+      .exec();
   }
 
   // ACTUALIZAR CONTRASEÑA DEL USUARIO
@@ -202,7 +211,7 @@ class UserService {
     const data = {
       status: user.status,
       name: user.name,
-      rol: user.rol
+      rol: user.rol,
     };
     return data;
   }
@@ -242,7 +251,7 @@ class UserService {
         arrayFilters: [{ 'element.idUser': idUser }], // CONDICION PARA EL ARREGLO
         multi: true, // IMPORTANTE
       };
-      
+
       const queryD = await postModel.updateMany(
         filterComment,
         actualizacion,
@@ -259,8 +268,6 @@ class UserService {
       await session.endSession();
     }
   }
-
-
 }
 
 module.exports = UserService;

@@ -21,7 +21,7 @@ const userSchema = mongoose.Schema(
     sex: String,
     age: Number,
     image: String,
-    role: [{ type: mongoose.Schema.Types.ObjectId, ref: 'roles' }],
+    roles: [{ type: mongoose.Schema.Types.ObjectId, ref: 'roles' }],
     status: [
       {
         name: String,
