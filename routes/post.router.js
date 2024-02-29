@@ -2,12 +2,23 @@ const express = require('express');
 const router = express.Router();
 const PostService = require('../services/post.service');
 const service = new PostService();
+const passport = require('passport');
 
 //POSTS
 router.get('/', async (req, res, next) => {
   const page = req.query.page;
   try {
     const response = await service.findAllPost(page); // ENLISTA TODOS LOS POST
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.get('/lastPost', async (req, res, next) => {
+  const idUser = req.user.sub;
+  try {
+    const response = await service.findLastPostUser(idUser); // ENLISTA TODOS LOS POST
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
@@ -25,18 +36,20 @@ router.post('/newpost', async (req, res, next) => {
 
 //LIKES
 router.post('/likepost', async (req, res, next) => {
+  const idUser = req.user.sub;
   try {
-    const response = await service.likePostByUser({ ...req.body }); //AÑADE EL LIKE DEL USUARIO
+    const response = await service.likePostByUser({ ...req.body }, idUser); //AÑADE EL LIKE DEL USUARIO
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
   }
 });
 
-router.delete('/likepost/:idpost/:iduser', async (req, res, next) => {
-  const { idpost,  iduser} = req.params;
+router.delete('/likepost/:idpost', async (req, res, next) => {
+  const idUser = req.user.sub;
+  const { idpost } = req.params;
   try {
-    const response = await service.deleteLikePostByUser(idpost,iduser); // ELIMINA EL LIKE DEL USUARIO
+    const response = await service.deleteLikePostByUser(idpost, idUser); // ELIMINA EL LIKE DEL USUARIO
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
@@ -46,7 +59,7 @@ router.delete('/likepost/:idpost/:iduser', async (req, res, next) => {
 router.get('/likepost/:idpost', async (req, res, next) => {
   const { idpost } = req.params;
   try {
-    const response = await service.countLikes(idpost); // ELIMINA EL LIKE DEL USUARIO
+    const response = await service.countLikes(idpost); // CUENTA LOS LIKES POR POST
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
@@ -73,11 +86,12 @@ router.delete('/comments/delete/:idpost/:idcomment', async (req, res, next) => {
   }
 });
 
-router.get('/comments/find/:idpost/:iduser', async (req, res, next) => {
-  const { idpost,  iduser} = req.params;
+router.get('/comments/find/:idpost/', async (req, res, next) => {
+  const { idpost} = req.params;
+  const page = req.query.page;
 
   try {
-    const response = await service.commentsByPost(idpost,iduser); // ELIMINA LOS COMENTARIOS POR ID DEL COMENTARIO
+    const response = await service.commentsByPost(idpost, page); // BUSCA LOS COMENTARIOS POR POST
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
@@ -86,8 +100,8 @@ router.get('/comments/find/:idpost/:iduser', async (req, res, next) => {
 
 
 //POSTS ESPECIFICOS
-router.get('/byuser/:idUser', async (req, res, next) => {
-  const { idUser } = req.params;
+router.get('/byuser/', async (req, res, next) => {
+  const idUser = req.user.sub;
   const page = req.query.page;
 
   try {
@@ -112,6 +126,16 @@ router.delete('/deletepost/:id', async (req, res, next) => {
   const { id } = req.params;
   try {
     const response = await service.deletePost(id); // ELIMINA EL POST
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.patch('/upImage', async (req, res, next) => {
+  const {image} = req.body;
+  try {
+    const response = await service.updateImagePosts(image); // BUSCA POST POR ID
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);

@@ -4,6 +4,9 @@ const passport = require('passport');
 
 const postsRouter = require('./post.router');
 const userRouter = require('./user.router');
+const storeRouter = require('./store.router');
+const orderRouter = require('./order.router');
+const productRouter = require('./product.router');
 const newsRouter = require('./news.router');
 const playerRouter = require('./roster.router');
 const postalCodeRouter = require('./postalCode.router');
@@ -16,8 +19,22 @@ const permissionRouter = require('./permission.router');
 
 const routerApi = (app) => {
   app.use('/api/v1', router);
-  router.use('/posts', postsRouter);
   router.use('/users', userRouter);
+  router.use(
+    '/posts',
+    passport.authenticate('jwt', { session: false }),
+    postsRouter,
+  );
+
+  router.use(
+    '/order',
+    passport.authenticate('jwt', { session: false }),
+    orderRouter,
+  );
+
+  router.use('/store', storeRouter);
+  router.use('/product', productRouter);
+
   router.use(
     '/news',
     passport.authenticate('jwt', { session: false }),
