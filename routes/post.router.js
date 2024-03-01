@@ -21,7 +21,7 @@ router.post('/create', async (req, res, next) => {
 router.get('/byuser/', async (req, res, next) => {
   const idUser = req.user.sub;
   const page = req.query.page;
-  
+
   try {
     const response = await service.findPostByUser(idUser, page); // BUSCA POSTS POR USUARIO
     res.status(200).json({ data: response });
@@ -29,21 +29,6 @@ router.get('/byuser/', async (req, res, next) => {
     next(e);
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 router.get('/', async (req, res, next) => {
   const page = req.query.page;
@@ -64,6 +49,22 @@ router.get('/lastPost', async (req, res, next) => {
     next(e);
   }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //LIKES
 router.post('/likepost', async (req, res, next) => {
