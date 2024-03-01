@@ -29,6 +29,23 @@ const userSchema = mongoose.Schema(
         userEdit: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
       },
     ],
+    // Este campo solo se usa especificamente para saber a que tienda pertenece el empleado en caso de que tenga el rol de empleado(food, market) de alguna tienda
+    stores: {
+      food: [
+        {
+          value: Boolean,
+          store: { type: mongoose.Schema.Types.ObjectId, ref: 'storesfood' },
+          userEdit: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+        },
+      ],
+      market: [
+        {
+          value: Boolean,
+          store: { type: mongoose.Schema.Types.ObjectId, ref: 'stores' },
+          userEdit: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+        },
+      ],
+    },
   },
   { timestamps: true },
 );

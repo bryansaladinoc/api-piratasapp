@@ -14,9 +14,14 @@ class UserService {
     const user = await User.findOne({
       phone,
     }).exec();
-    const match = await bcrypt.compare(password, user.password);
 
-    if (!user && !match) {
+    if (!user) {
+      throw boom.unauthorized();
+    }
+
+    const match = await bcrypt.compare(password, user?.password);
+
+    if (!match) {
       throw boom.unauthorized();
     }
 
@@ -42,7 +47,16 @@ class UserService {
   }
 
   async find() {
-    return await User.find().populate('roles').exec();
+    return await User.find()
+      .populate({
+        path: 'roles',
+        model: 'roles',
+        populate: {
+          path: 'permissions',
+          model: 'permissions',
+        },
+      })
+      .exec();
   }
 
   // Sustituye a selectUser ya tiene el populate
@@ -55,6 +69,14 @@ class UserService {
           path: 'permissions',
           model: 'permissions',
         },
+      })
+      .populate({
+        path: 'stores.food.store',
+        model: 'storesfood',
+      })
+      .populate({
+        path: 'stores.food.userEdit',
+        model: 'user',
       })
       .exec();
   }

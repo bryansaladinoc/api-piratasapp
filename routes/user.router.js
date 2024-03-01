@@ -22,7 +22,6 @@ Router.post('/signin', async (req, res, next) => {
   try {
     const { phone, password } = req.body;
     const result = await service.login(phone, password);
-
     // res.cookie('token', result, {
     //   httpOnly: true,
     //   secure: false,
