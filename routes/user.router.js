@@ -99,4 +99,18 @@ Router.patch(
   },
 );
 
+//Actualiza el status del usuario
+Router.patch(
+  '/status',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    try {
+      const result = await service.updateStatus(req.user.sub, { ...req.body });
+      return res.status(201).json({ result });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
 module.exports = Router;

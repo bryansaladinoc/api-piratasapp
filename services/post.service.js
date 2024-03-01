@@ -143,6 +143,16 @@ class PostService {
   }
 
 
+  //ESTE METODO REGISTRA NUEVOS COMENTARIOS
+  async createComment(data, idUser) {
+    data.comments.user = idUser;
+    data.comments.createdAt = new Date();
+    const result = await model.updateMany({ "_id": data.idPost }, { $push: { 'comments': data.comments } });
+    return await result;
+  }
+
+
+
   async findPost(idPost) {
     // const result = await model.findOne({ "_id": idPost}).exec();
     const result = await model.aggregate([
@@ -153,8 +163,22 @@ class PostService {
         },
       },
       {
+        "$lookup": {
+          "from": "users", // Reemplaza con el nombre de tu colección de usuarios
+          "localField": "user",
+          "foreignField": "_id",// Campos que quieres obtener del usuario
+          "as": "user"
+        }
+      },
+      { "$unwind": "$user" },
+      {
         "$project": {
-          "user": 1,
+          "user": {
+            "_id": 1,
+            "name": 1,
+            "nickname": 1,
+            "image": 1,
+          },
           "_id": 1,
           "content": 1,
           "contentType": 1,
@@ -170,32 +194,27 @@ class PostService {
     if (result.length === 0) {
       throw boom.notFound('Post not found');
     }
-
     return await result;
   }
 
-  async countLikes(idPost) {
-    const result = await model.aggregate([
-      {
-        "$match": {
-          "_id": new mongoose.Types.ObjectId(idPost) // Condición para campo1
-          // Puedes agregar otras condiciones aquí
-        },
-      },
-      {
-        "$project": {
-          "_id": 1,
-          "likes": 1,
-          "countLikes": { "$size": '$likes' },
-          "countComments": { "$size": '$comments' }
-        }
-      }
-    ]);
-    return await result;
+  async commentsByPost(idPost, page) {
+    const result = await model.findOne({ "_id": idPost }, 'comments')
+      .populate({
+        path: 'comments.user',
+        model: 'user',  // Asegúrate de usar el mismo nombre de modelo que en tus esquemas
+        select: 'name nickname image'  // Poblado para obtener detalles básicos del usuario
+      })
+      .exec();
+
+    const commentsPage = result.comments
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice((page - 1) * 5, page * 5);
+
+    return await commentsPage;
   }
 
-  async deletePost(idPost) {
-    const result = await model.deleteOne({ "_id": idPost });
+  async deleteLikePostByUser(idpost, iduser) {
+    const result = await model.updateMany({ "_id": idpost }, { $pull: { "likes": { "idUser": iduser } } });
     return await result;
   }
 
@@ -207,29 +226,14 @@ class PostService {
     return await result;
   }
 
-  async deleteLikePostByUser(idpost, iduser) {
-    const result = await model.updateMany({ "_id": idpost }, { $pull: { "likes": { "idUser": iduser } } });
-    return await result;
-  }
-
-  //ESTE METODO REGISTRA NUEVOS COMENTARIOS
-  async createComment(dataPost) {
-    const result = await model.updateMany({ "_id": dataPost.idPost }, { $push: { 'comments': dataPost.comments } });
+  async deletePost(idPost) {
+    const result = await model.deleteOne({ "_id": idPost });
     return await result;
   }
 
   async deleteComment(idpost, idcomment) {
     const result = await model.updateMany({ "_id": idpost }, { $pull: { "comments": { "_id": idcomment } } });
     return await result;
-  }
-
-  async commentsByPost(idPost, page) {
-    const result = await model.findOne({ "_id": idPost }, 'comments').exec();
-
-    const commentsPage = result.comments
-      .sort((a, b) => b.createdAt - a.createdAt) // Ordena por fecha en orden descendente (más reciente primero)
-      .slice((page - 1) * 5, page * 5);
-    return await commentsPage;
   }
 
   async updateImagePosts(image) {

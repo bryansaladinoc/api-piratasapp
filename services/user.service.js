@@ -206,58 +206,28 @@ class UserService {
     }
   }
 
-  async userStatusPosts(idUser, status) {
-    const session = await User.startSession();
-    await session.startTransaction();
-    try {
-      await User.updateOne(
-        { _id: idUser },
-        {
-          'status.posts': status,
-        },
-        { session },
+  async updateStatus(userEdit, data) {
+    const status = {
+      name: data.module,
+      value: data.value,
+      userEdit: userEdit,
+    };
+  
+    let result = await User.updateOne(
+      { _id: data.idUser, "status.name": data.module },
+      { $set: { "status.$": status } }
+    );
+    
+    if (result.modifiedCount === 0) {
+      result = await User.updateOne(
+        { _id: data.idUser },
+        { $addToSet: { status: status } }
       );
-
-      // ACTUALIZA LA INFORMACION DEL USARIO EN TODOS LOS POST QUE EL HAYA REALIZADO
-      const filterPost = { 'user.idUser': idUser };
-      const updatePost = await postModel.updateMany(
-        filterPost,
-        {
-          'user.status': status,
-        },
-        { session },
-      );
-
-      // ACTUALIZA TODOS LOS  COMENTARIOS QUE EL USUARIO HAYA REALIZADO EN TODOS LOS POSTS
-      const filterComment = { 'comments.idUser': idUser }; // CONDICION PARA EL QUERY
-      const actualizacion = {
-        $set: {
-          'comments.$[element].userStatus': status,
-        },
-      };
-
-      const opciones = {
-        session: session,
-        arrayFilters: [{ 'element.idUser': idUser }], // CONDICION PARA EL ARREGLO
-        multi: true, // IMPORTANTE
-      };
-
-      const queryD = await postModel.updateMany(
-        filterComment,
-        actualizacion,
-        opciones,
-      );
-
-      await session.commitTransaction();
-      return true;
-    } catch (err) {
-      await session.abortTransaction();
-      console.log(err);
-      return fasle;
-    } finally {
-      await session.endSession();
     }
+  
+    return result;
   }
+
 }
 
 module.exports = UserService;
