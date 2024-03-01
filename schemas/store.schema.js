@@ -6,14 +6,7 @@ const storeSchema = mongoose.Schema(
     location: String,
     latitud: String,
     longitud: String,
-    employees: [
-      {
-        idUser: String,
-        name: String,
-        lastname: String,
-        motherlastname: String,
-        phone: { type: String, unique: true }
-      }],
+    employees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' },],
   },
   { timestamps: true },
 );

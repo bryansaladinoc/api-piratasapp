@@ -1,29 +1,13 @@
 const mongoose = require('mongoose');
 
 const postSchema = mongoose.Schema({
-    user: {
-        idUser: String,
-        nickname: String,
-        name: String,
-        lastname: String,
-        motherlastname: String,
-        imageUserUri: String,
-        rol: String,
-        status: Boolean
-    },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
     content: String,
     contentType: String,
     imageContent: String,
     comments: [
         {
-            idUser: String,
-            nickname: String,
-            name: String,
-            lastname: String,
-            motherlastname: String,
-            imageUserUri: String,
-            rol: String,
-            userStatus: Boolean,
+            user: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
             comment: String,
             createdAt: Date
         }

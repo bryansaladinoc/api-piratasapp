@@ -6,13 +6,7 @@ const orderSchema = mongoose.Schema(
     status: String,
     statusNote: String,
     confirmationDate: Date,
-    userEdit: {
-      idUser: String,
-      name: String,
-      lastname: String,
-      motherLastname: String,
-      phone: String,
-    },
+    userEdit: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
     deliveryKey: String,
     total: Number,
     store: {
@@ -38,11 +32,9 @@ const orderSchema = mongoose.Schema(
         productType: String,
       },
     ],
-    user: {
-      idUser: String,
-      name: String,
-      lastname: String,
-      motherLastname: String,
+    userOrder: {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+      deliveryUser: String,
       phone: String,
       phonecode: {
         code: String,
