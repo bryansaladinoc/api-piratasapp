@@ -71,7 +71,7 @@ Router.get(
 // );
 
 Router.patch(
-  '/user/update',
+  '/update',
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
     try {
@@ -84,7 +84,7 @@ Router.patch(
 );
 
 Router.patch(
-  '/user/password',
+  '/password',
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
     try {
@@ -105,6 +105,20 @@ Router.patch(
   async (req, res, next) => {
     try {
       const result = await service.updateStatus(req.user.sub, { ...req.body });
+      return res.status(201).json({ result });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+Router.patch(
+  '/phone',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    const data = req.body;
+    try {
+      const result = await service.updateStatus(req.user.sub, data.phone);
       return res.status(201).json({ result });
     } catch (e) {
       next(e);
