@@ -20,7 +20,9 @@ const orderSchema = mongoose.Schema(
     ],
     userOrder: {
       user: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
-      deliveryUser: String,
+      name: String,
+      lastname: String,
+      motherLastname: String,
       phone: String,
       phonecode: {
         code: String,

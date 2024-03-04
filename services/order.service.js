@@ -17,13 +17,12 @@ class OrderService {
     const session = await model.startSession();
     await session.startTransaction();
     try {
-      const idStore = data.store;
+      const idStore = data.store.idStore;
       const deliveryKeyEncrypted = encrypt(data.deliveryKey);
       data.deliveryKey = JSON.stringify(deliveryKeyEncrypted);
-      /* data.deliveryDate = new Date();
-      data.confirmationDate = new Date(); */
       data.userEdit = idUser;
       data.userOrder.user = idUser;
+      data.store = idStore;
 
       const order = await new model({ ...data });
       await order.save();
@@ -89,15 +88,17 @@ class OrderService {
   }
 
   async findUser(idUser) {
-    let result = await model.find({ "user.idUser": idUser }, {
-      ' _id': 1,
-      'createdAt': 1,
-      'total': 1,
-      'status': 1,
-      'store.name': 1,
-      'deliveryDate': 1,
-      'deliveryKey': 1,
-    }).sort({ createdAt: -1 });
+    let result = await model.find({ "userOrder.user": idUser })
+  .select({
+    '_id': 1,
+    'createdAt': 1,
+    'total': 1,
+    'status': 1,
+    'deliveryDate': 1,
+    'deliveryKey': 1,
+    'store': 1, // Assuming the field that references the store is named 'store'
+  })
+  .populate('store', ['name']).sort({ createdAt: -1 });
 
     result = result.map(item => {
       const deliveryKeyObject = JSON.parse(item.deliveryKey);
@@ -109,7 +110,10 @@ class OrderService {
   }
 
   async find(idOrder) {
-    const result = await model.findOne({ "_id": idOrder });
+    const result = 
+    await model.findOne({ "_id": idOrder }).
+    populate('store userOrder.user userEdit.idUser products.idProduct');
+
     const deliveryKeyObject = JSON.parse(result.deliveryKey);
     result.deliveryKey = decrypt(deliveryKeyObject);
     return await result;
@@ -140,22 +144,13 @@ class OrderService {
     const session = await model.startSession();
     await session.startTransaction();
     try {
-      const user = await userModel.findOne({ '_id': userLogged });
-      const userEdit = {
-        idUser: user._id,
-        name: user.name,
-        lastname: user.lastname,
-        motherLastname: user.motherlastname,
-        phone: user.phone
-      };
-
       const result = await model.updateOne(
         { "_id": idOrder },
         {
           $set: {
             "status": status,
             "statusNote": statusNote,
-            "userEdit": userEdit
+            "userEdit": userLogged
           }
         }
       );
@@ -170,6 +165,8 @@ class OrderService {
     }
   }
 }
+
+
 
 async function upDateStatusDelivery() {
   try {

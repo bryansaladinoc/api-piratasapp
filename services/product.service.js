@@ -51,15 +51,32 @@ class ProductService {
       {
         $match: {
           _id: new mongoose.Types.ObjectId(idProd),
-          'stores': {
-            $elemMatch: {
-              'stock': { $ne: 0 }
-            }
-          }
-        }
+        },
       },
       {
-        $unwind: '$stores'
+        $unwind: '$stores',
+      },
+      {
+        $match: {
+          'stores.stock': { $ne: 0 },
+          'stores.status': true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'stores.userEdit',
+          foreignField: '_id',
+          as: 'userEditStore',
+        },
+      },
+      {
+        $lookup: {
+          from: 'stores',
+          localField: 'stores.store',
+          foreignField: '_id',
+          as: 'storeInfo',
+        },
       },
       {
         $group: {
@@ -80,32 +97,37 @@ class ProductService {
           updatedAt: { $first: '$updatedAt' },
           status: { $first: '$status' },
           userEditData: { $first: '$userEdit' },
-          stores: { $addToSet: '$stores.store' }
-        }
-      },
-      {
-        $lookup: {
-          from: 'stores',
-          localField: 'stores',
-          foreignField: '_id',
-          as: 'storesData'
-        }
+          stores: { $addToSet: '$stores._id' },
+          storesData: {
+            $addToSet: {
+              _id: '$stores.store',
+              name: { $arrayElemAt: ['$storeInfo.name', 0] },
+              location: { $arrayElemAt: ['$storeInfo.location', 0] },
+              latitud: { $arrayElemAt: ['$storeInfo.latitud', 0] },
+              longitud: { $arrayElemAt: ['$storeInfo.longitud', 0] },
+              stock: '$stores.stock',
+              createAt: '$stores.createAt',
+              status: '$stores.status',
+              userEditStore: {
+                _id: { $arrayElemAt: ['$userEditStore._id', 0] },
+                nickname: { $arrayElemAt: ['$userEditStore.nickname', 0] },
+                email: { $arrayElemAt: ['$userEditStore.email', 0] },
+                phone: { $arrayElemAt: ['$userEditStore.phone', 0] },
+                name: { $arrayElemAt: ['$userEditStore.name', 0] },
+                lastname: { $arrayElemAt: ['$userEditStore.lastname', 0] },
+                motherlastname: { $arrayElemAt: ['$userEditStore.motherlastname', 0] }
+              },
+            },
+          },
+        },
       },
       {
         $lookup: {
           from: 'users',
           localField: 'userEdit',
           foreignField: '_id',
-          as: 'userEditData'
-        }
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'storesData.userEdit',
-          foreignField: '_id',
-          as: 'userEditStore'
-        }
+          as: 'userEditData',
+        },
       },
       {
         $project: {
@@ -121,23 +143,21 @@ class ProductService {
           priceCurrent: 1,
           exclusive: 1,
           sku: 1,
-          userEdit: 1,
           createdAt: 1,
           updatedAt: 1,
           status: 1,
           userEditData: {
             _id: 1,
-            name: 1
-          },
-          storesData: {
-            _id: 1,
+            nickname: 1,
+            email: 1,
+            phone: 1,
             name: 1,
-            userEditStore: {
-              name: { $arrayElemAt: ['$userEditStore.name', 0] }
-            }
+            lastname: 1,
+            motherlastname: 1
           },
-        }
-      }
+          storesData: 1,
+        },
+      },
     ]);
 
     return result;
@@ -147,7 +167,7 @@ class ProductService {
     const result = await model.aggregate([
       {
         $match: {
-          _id: new mongoose.Types.ObjectId(idProduct)
+          _id: new mongoose.Types.ObjectId(idProduct),
         }
       },
       {
@@ -185,7 +205,7 @@ class ProductService {
       {
         $project: {
           _id: 1,
-          stores:{
+          stores: {
             stock: 1,
             createdAt: 1,
           },

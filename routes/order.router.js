@@ -14,31 +14,12 @@ router.post('/create/', async (req, res, next) => {
   }
 });
 
-router.get('/find/all', async (req, res, next) => {
-  try {
-    const response = await service.findAll(); // ENLISTA TODOS LOS TICKETS
-    res.status(200).json({ data: response });
-  } catch (e) {
-    next(e);
-  }
-});
-
 
 router.get('/find/user',
 async (req, res, next) => {
   const idUser = req.user.sub;
   try {
     const response = await service.findUser(idUser); // ENLISTA TODOS LOS TICKETS
-    res.status(200).json({ data: response });
-  } catch (e) {
-    next(e);
-  }
-});
-
-router.get('/find/', async (req, res, next) => {
-  const idOrder = req.query.idOrder;
-  try {
-    const response = await service.find(idOrder); // ENLISTA TODOS LOS TICKETS
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
@@ -54,5 +35,31 @@ router.patch('/update/status', async (req, res, next) => {
     next(e);
   }
 });
+
+
+
+
+
+router.get('/find/all', async (req, res, next) => {
+  try {
+    const response = await service.findAll(); // ENLISTA TODOS LOS TICKETS
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
+
+router.get('/find/', async (req, res, next) => {
+  const idOrder = req.query.idOrder;
+  try {
+    const response = await service.find(idOrder); // ENLISTA TODOS LOS TICKETS
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
+
 
 module.exports = router;
