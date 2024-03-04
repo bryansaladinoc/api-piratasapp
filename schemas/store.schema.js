@@ -6,7 +6,7 @@ const storeSchema = mongoose.Schema(
     location: String,
     latitud: String,
     longitud: String,
-    employees: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' },],
+    userEdit: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
   },
   { timestamps: true },
 );

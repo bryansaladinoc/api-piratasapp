@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const productmSchema = mongoose.Schema(
   {
     name: { type: String, unique: true },
-    person: String,
-    productType: String,
+    typeProduct: String,
     description: String,
     image: String,
     category: String,
@@ -15,15 +14,12 @@ const productmSchema = mongoose.Schema(
     status: Boolean,
     sku: { type: String, unique: true },
     userEdit: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
-    store: [
+    stores: [
       {
-        idStore: String,
-        name: String,
-        location: String,
-        latitud: String,
-        longitud: String,
+        store: { type: mongoose.Schema.Types.ObjectId, ref: 'store' },
         stock: Number,
         createAt: Date, //"2024-02-12T15:30:42.320Z"
+        status: Boolean,
         userEdit: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
       },
     ],

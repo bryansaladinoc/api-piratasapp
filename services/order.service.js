@@ -10,54 +10,50 @@ const userModel = require('../schemas/user.schema');
 const productModel = mongoose.model('product', productSchema);
 
 class OrderService {
-  async newOrder(data) {
+  async newOrder(data, idUser) {
     data.status = 'Pendiente';
     data.statusNote = 'Pendiente de confirmación';
-    console.log(data.deliveryKey);
-
-    const deliveryKeyEncrypted = encrypt(data.deliveryKey);
-    data.deliveryKey = JSON.stringify(deliveryKeyEncrypted);
 
     const session = await model.startSession();
     await session.startTransaction();
     try {
-      const user = await userModel.findOne({ '_id': data.user.idUser });
-      data.userEdit = {
-        idUser: user._id,
-        name: user.name,
-        lastname: user.lastname,
-        motherLastname: user.motherlastname,
-        phone: user.phone
-      };
-
+      const idStore = data.store;
+      const deliveryKeyEncrypted = encrypt(data.deliveryKey);
+      data.deliveryKey = JSON.stringify(deliveryKeyEncrypted);
+      /* data.deliveryDate = new Date();
+      data.confirmationDate = new Date(); */
+      data.userEdit = idUser;
+      data.userOrder.user = idUser;
 
       const order = await new model({ ...data });
       await order.save();
+      console.log('Orden creada:', order._id);
 
-      const idStore = data.store.idStore;
       for (const product of data.products) {
         const idProduct = product.idProduct;
         const amount = product.amount;
         //BUSCAR STOCK
         const findStock = await productModel.findOne(
-          { '_id': idProduct, 'store.idStore': idStore },
-          { 'store.$': 1 }
+          { '_id': idProduct, 'stores.store': idStore },
+          { 'stores.$': 1 }
         );
 
+        console.log(findStock);
         //SI NO HAY STOCK
-        if (findStock.store[0].stock < amount) {
+        if (findStock.stores[0].stock < amount) {
           throw new Error('No hay suficiente stock');
+
         } else {
           await productModel.updateOne(
-            { '_id': idProduct, 'store.idStore': idStore },
-            { $inc: { 'store.$.stock': -amount } }
+            { '_id': idProduct, 'stores.store': idStore },
+            { $inc: { 'stores.$.stock': -amount } }
           );
         }
       }
 
       await session.commitTransaction();
       session.endSession();
-      return order;
+      return data.products;
     } catch (error) {
       console.log(error);
       await session.abortTransaction();
@@ -65,6 +61,18 @@ class OrderService {
       throw boom.badRequest(error);
     }
   }
+
+
+
+
+
+
+
+
+
+
+
+
 
   async findAll() {
     const result = await model.find({}, {
@@ -90,7 +98,7 @@ class OrderService {
       'deliveryDate': 1,
       'deliveryKey': 1,
     }).sort({ createdAt: -1 });
-  
+
     result = result.map(item => {
       const deliveryKeyObject = JSON.parse(item.deliveryKey);
       item.deliveryKey = decrypt(deliveryKeyObject);

@@ -36,8 +36,17 @@ const routerApi = (app) => {
     orderRouter,
   );
 
-  router.use('/store', storeRouter);
-  router.use('/product', productRouter);
+  router.use('/store',
+    passport.authenticate('jwt', { session: false }),
+    (req, res, next) => userStatus(req, res, next, { search: 'store' }),
+    storeRouter
+  );
+
+  router.use('/product',
+    passport.authenticate('jwt', { session: false }),
+    (req, res, next) => userStatus(req, res, next, { search: 'store' }),
+    productRouter
+  );
 
   router.use(
     '/news',

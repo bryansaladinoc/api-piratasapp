@@ -155,7 +155,7 @@ class UserService {
     }
   }
 
-  async upDatePhone(idUser, phone) {
+  async upDatePhone(idUser, phone, phonecode) {
     const session = await User.startSession();
     await session.startTransaction();
     try {
@@ -163,6 +163,7 @@ class UserService {
         { _id: idUser },
         {
           phone: phone,
+          phonecode: phonecode,
         },
         { session },
       );

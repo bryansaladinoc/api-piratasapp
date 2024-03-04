@@ -117,8 +117,9 @@ Router.patch(
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
     const data = req.body;
+    console.log(data.phonecode);
     try {
-      const result = await service.updateStatus(req.user.sub, data.phone);
+      const result = await service.upDatePhone(req.user.sub, data.phone, data.phonecode);
       return res.status(201).json({ result });
     } catch (e) {
       next(e);

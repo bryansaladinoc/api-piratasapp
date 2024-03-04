@@ -5,8 +5,9 @@ const service = new OrderService();
 const passport = require('passport');
 
 router.post('/create/', async (req, res, next) => {
+  const idUser = req.user.sub;
   try {
-    const response = await service.newOrder({...req.body}); // CREA UN NUEVO TICKET
+    const response = await service.newOrder({...req.body}, idUser); // CREA UN NUEVO TICKET
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
@@ -23,7 +24,7 @@ router.get('/find/all', async (req, res, next) => {
 });
 
 
-router.get('/find/user', 
+router.get('/find/user',
 async (req, res, next) => {
   const idUser = req.user.sub;
   try {

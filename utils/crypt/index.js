@@ -1,13 +1,11 @@
 const crypto = require('crypto');
-const algorithm = 'aes-256-cbc'; 
+const algorithm = 'aes-256-cbc';
 const config = require('../../config/config');
 const iv = crypto.randomBytes(16); // debe tener 16 bytes
 
 function encrypt(text) {
     const keyCrypto = config.keyCrypto;
-    
     const cipher = crypto.createCipheriv(algorithm, config.keyCrypto, iv);
-
     const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
 
     return {

@@ -9,28 +9,14 @@ const orderSchema = mongoose.Schema(
     userEdit: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
     deliveryKey: String,
     total: Number,
-    store: {
-      idStore: String,
-      name: String,
-      location: String,
-      latitud: String,
-      longitud: String,
-    },
+    store: { type: mongoose.Schema.Types.ObjectId, ref: 'store' },
     products: [
       {
-        idProduct: String,
-        name: String,
-        sku: String,
-        description: String,
+        idProduct: { type: mongoose.Schema.Types.ObjectId, ref: 'product' },
         amount: Number,
         price: Number,
-        subtotal: Number,
-        size: String,
-        //color: String,
-        category: String,
-        person: String,
-        productType: String,
-      },
+        subtotal: Number
+      }
     ],
     userOrder: {
       user: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },

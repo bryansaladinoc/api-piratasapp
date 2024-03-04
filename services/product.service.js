@@ -4,108 +4,28 @@ const productSchema = require('../schemas/product.schema');
 const model = mongoose.model('product', productSchema);
 
 class ProductService {
-  async new(data) {
+  async new(data, idUser) {
+    data.userEdit = idUser;
+    data.priceOld = data.priceCurrent;
     const result = await new model({ ...data });
     await result.save();
     return await result;
   }
 
-  async newStore(data) { // REGISTRA UNA NUEVA TIENDA
-    const result = await model.updateOne(
-      { "_id": data.idProduct },
-      { $push: { "store": data.newStore } }
-    );
-    return await result;
-  }
-
-  async find(idProd) {
-    //const result = await model.findOne({ "_id": idProd });
+  async findAllActive() {
     const result = await model.aggregate([
       {
-        $match: {
-          _id: new mongoose.Types.ObjectId(idProd), // Convertir el ID a un objeto ObjectId
-          'store': {
-            $elemMatch: {
-              'stock': { $ne: 0 }
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          name: 1,
-          person: 1,
-          productType: 1,
-          description: 1,
-          image: 1,
-          category: 1,
-          size: 1,
-          priceOld: 1,
-          priceCurrent: 1,
-          exclusive: 1,
-          sku: 1,
-          userEdit: 1,
-          createdAt: 1,
-          updatedAt: 1,
-          status: 1,
-          store: {
-            $filter: {
-              input: '$store',
-              as: 'storeItem',
-              cond: { $ne: ['$$storeItem.stock', 0] }
-            }
-          }
-        }
-      }
-    ]);
-
-    return await result;
-  }
-
-  async findLike(name) {
-    const result = await model.aggregate([
-      {
-        "$match": { "name": new RegExp(name, 'i') } // Filtra por coincidenca 'i' mayusculas y minusculas
-      },
-      {
-        "$unwind": '$store' // Deshace el array 'store' para tratar cada tienda por separado
+        "$unwind": '$stores' // Deshace el array 'stores' para tratar cada tienda por separado
       },
       {
         "$group": {
           "_id": '$_id', // Agrupa por el ID del producto
-          "totalStock": {"$sum": '$store.stock' }, // Suma el stock de todas las especificaciones
+          "totalStock": { "$sum": '$stores.stock' }, // Suma el stock de todas las especificaciones
           "name": { "$first": '$name' }, // GREGA MAS CAMPOS A LA CONSULTA
           "description": { "$first": '$description' },
-          "person": { "$first": '$person' },
-          "price": { "$first": '$priceCurrent'},
-          "priceOld": { "$first": '$priceOld'},
-          "productType": { "$first": '$productType' },
-          "image": { "$first": '$image' },
-          "size": { "$first": '$size' },
-          "exclusive": { "$first": '$exclusive' },
-          "category": { "$first": '$category' },
-          "sku": { "$first": '$sku' },
-        }
-      }
-    ]);
-    return await result;
-  }
-
-  async findAll() {
-    const result = await model.aggregate([
-      {
-        "$unwind": '$store' // Deshace el array 'store' para tratar cada tienda por separado
-      },
-      {
-        "$group": {
-          "_id": '$_id', // Agrupa por el ID del producto
-          "totalStock": {"$sum": '$store.stock' }, // Suma el stock de todas las especificaciones
-          "name": { "$first": '$name' }, // GREGA MAS CAMPOS A LA CONSULTA
-          "description": { "$first": '$description' },
-          "person": { "$first": '$person' },
-          "price": { "$first": '$priceCurrent'},
-          "priceOld": { "$first": '$priceOld'},
-          "productType": { "$first": '$productType' },
+          "price": { "$first": '$priceCurrent' },
+          "priceOld": { "$first": '$priceOld' },
+          "typeProduct": { "$first": '$typeProduct' },
           "image": { "$first": '$image' },
           "size": { "$first": '$size' },
           "exclusive": { "$first": '$exclusive' },
@@ -126,14 +46,190 @@ class ProductService {
   }
 
 
-  async findInStore(idProduct, idStore) {
-    const result = await model.findOne( // Buscar un empelado que coincida con la condición
-      { "_id": idProduct, "store.name": idStore },
-      { "store.$": 1 } // Proyección para seleccionar solo el primer elemento que coincida, se pueden agregar más campos
-    ).exec();
+  async findActive(idProd) {
+    const result = await model.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idProd),
+          'stores': {
+            $elemMatch: {
+              'stock': { $ne: 0 }
+            }
+          }
+        }
+      },
+      {
+        $unwind: '$stores'
+      },
+      {
+        $group: {
+          _id: '$_id',
+          totalStock: { $sum: '$stores.stock' },
+          name: { $first: '$name' },
+          typeProduct: { $first: '$typeProduct' },
+          description: { $first: '$description' },
+          image: { $first: '$image' },
+          category: { $first: '$category' },
+          size: { $first: '$size' },
+          priceOld: { $first: '$priceOld' },
+          priceCurrent: { $first: '$priceCurrent' },
+          exclusive: { $first: '$exclusive' },
+          sku: { $first: '$sku' },
+          userEdit: { $first: '$userEdit' },
+          createdAt: { $first: '$createdAt' },
+          updatedAt: { $first: '$updatedAt' },
+          status: { $first: '$status' },
+          userEditData: { $first: '$userEdit' },
+          stores: { $addToSet: '$stores.store' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'stores',
+          localField: 'stores',
+          foreignField: '_id',
+          as: 'storesData'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userEdit',
+          foreignField: '_id',
+          as: 'userEditData'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'storesData.userEdit',
+          foreignField: '_id',
+          as: 'userEditStore'
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          totalStock: 1,
+          name: 1,
+          typeProduct: 1,
+          description: 1,
+          image: 1,
+          category: 1,
+          size: 1,
+          priceOld: 1,
+          priceCurrent: 1,
+          exclusive: 1,
+          sku: 1,
+          userEdit: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          status: 1,
+          userEditData: {
+            _id: 1,
+            name: 1
+          },
+          storesData: {
+            _id: 1,
+            name: 1,
+            userEditStore: {
+              name: { $arrayElemAt: ['$userEditStore.name', 0] }
+            }
+          },
+        }
+      }
+    ]);
+
+    return result;
+  }
+
+  async findInStore(idProduct, nameStore) { // BUSCA UN PRODUCTO EN UNA TIENDA
+    const result = await model.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(idProduct)
+        }
+      },
+      {
+        $unwind: '$stores'
+      },
+      {
+        $lookup: {
+          from: 'stores',
+          localField: 'stores.store',
+          foreignField: '_id',
+          as: 'storeInfo'
+        }
+      },
+      {
+        $match: {
+          'storeInfo.name': nameStore
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'stores.userEdit',
+          foreignField: '_id',
+          as: 'userEditStore'
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userEdit',
+          foreignField: '_id',
+          as: 'userEditData'
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          stores:{
+            stock: 1,
+            createdAt: 1,
+          },
+          userEditData: {
+            "name": { $arrayElemAt: ['$userEditData.name', 0] }
+          },
+          storeInfo: {
+            "_id": { $arrayElemAt: ['$storeInfo._id', 0] },
+            "name": { $arrayElemAt: ['$storeInfo.name', 0] },
+            "location": { $arrayElemAt: ['$storeInfo.location', 0] },
+            "latitud": { $arrayElemAt: ['$storeInfo.latitud', 0] },
+            "longitud": { $arrayElemAt: ['$storeInfo.longitud', 0] },
+            userEditStore: {
+              "name": { $arrayElemAt: ['$userEditStore.name', 0] }
+            }
+          }
+          // Agrega más campos según sea necesario
+        }
+      }
+    ]);
+
+    return result;
+  }
+
+  //OPCIONES DE ADMINISTRADOR
+  async newStore(data, idUser) { // REGISTRAR  NUEVO PRODUCTO EN UNA TIENDA
+    const store = {
+      store: data.idStore,
+      stock: data.stock,
+      createAt: new Date(),
+      status: true,
+      userEdit: idUser
+    };
+
+    const result = await model.updateOne(
+      { "_id": data.idProduct },
+      { $push: { "stores": store } }
+    );
 
     return await result;
   }
+
+
+
 
   async generalUpdate(data) { // ACTUALIZA LA INFORMACIÓN GENERAL DEL PRODUCTO, SOLO EL ADMIN PUEDE REALIZAR ESTA ACCION
     const result = await model.updateOne(
@@ -166,11 +262,15 @@ class ProductService {
   async delOfStore(idProd, idStore) {
     const result = await model.updateOne(
       { "_id": idProd },
-    { $pull:
-      { "store": { "idStore": idStore }
-    }});
+      {
+        $pull:
+        {
+          "store": { "idStore": idStore }
+        }
+      });
     return await result;
   }
+
 }
 
 
