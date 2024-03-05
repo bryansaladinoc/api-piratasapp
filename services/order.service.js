@@ -6,7 +6,6 @@ const productSchema = require('../schemas/product.schema');
 const { encrypt, decrypt } = require('../utils/crypt/index');
 
 const model = mongoose.model('order', orderSchema);
-const userModel = require('../schemas/user.schema');
 const productModel = mongoose.model('product', productSchema);
 
 class OrderService {
@@ -26,7 +25,6 @@ class OrderService {
 
       const order = await new model({ ...data });
       await order.save();
-      console.log('Orden creada:', order._id);
 
       for (const product of data.products) {
         const idProduct = product.idProduct;
@@ -52,7 +50,7 @@ class OrderService {
 
       await session.commitTransaction();
       session.endSession();
-      return data.products;
+      return order;
     } catch (error) {
       console.log(error);
       await session.abortTransaction();
@@ -61,44 +59,18 @@ class OrderService {
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-  async findAll() {
-    const result = await model.find({}, {
-      ' _id': 1,
-      'deliveryDate': 1,
-      'status': 1,
-      'total': 1,
-      'store': 1,
-      'user': 1,
-      'createdAt': 1,
-      'updatedAt': 1,
-    }).sort({ createdAt: -1 });
-    return await result;
-  }
-
   async findUser(idUser) {
     let result = await model.find({ "userOrder.user": idUser })
-  .select({
-    '_id': 1,
-    'createdAt': 1,
-    'total': 1,
-    'status': 1,
-    'deliveryDate': 1,
-    'deliveryKey': 1,
-    'store': 1, // Assuming the field that references the store is named 'store'
-  })
-  .populate('store', ['name']).sort({ createdAt: -1 });
+      .select({
+        '_id': 1,
+        'createdAt': 1,
+        'total': 1,
+        'status': 1,
+        'deliveryDate': 1,
+        'deliveryKey': 1,
+        'store': 1, // Assuming the field that references the store is named 'store'
+      })
+      .populate('store', ['name']).sort({ createdAt: -1 });
 
     result = result.map(item => {
       const deliveryKeyObject = JSON.parse(item.deliveryKey);
@@ -110,9 +82,9 @@ class OrderService {
   }
 
   async find(idOrder) {
-    const result = 
-    await model.findOne({ "_id": idOrder }).
-    populate('store userOrder.user userEdit.idUser products.idProduct');
+    const result =
+      await model.findOne({ "_id": idOrder }).
+        populate('store userOrder.user userEdit.idUser products.idProduct');
 
     const deliveryKeyObject = JSON.parse(result.deliveryKey);
     result.deliveryKey = decrypt(deliveryKeyObject);
@@ -120,30 +92,40 @@ class OrderService {
   }
 
   async updateStatus(data, userLogged) {
-    if (data.status === 'Cancelado por cliente') {
-      data.statusNote = 'Cancelado por el cliente';
+    if (data.status === "Cancelado por cliente") {
+      data.statusNote = "Cancelado por el cliente";
 
-    } else if (data.status === 'Cancelado sin confirmación') {
-      data.statusNote = 'El vendedor no confirmó la orden';
+    } else if (data.status === "Cancelado sin confirmación") {
+      data.statusNote = "El vendedor no confirmó la orden";
 
-    } else if (data.status === 'Cancelado sin entrega') {
-      data.statusNote = 'El cliente no recogio el producto';
+    } else if (data.status === "Cancelado sin entrega") {
+      data.statusNote = "El cliente no recogio el producto";
 
-    } else if (data.status === 'Entregado') {
-      data.statusNote = 'Pedido entregado al cliente';
+    } else if (data.status === "Entregado") {
+      data.statusNote = "Pedido entregado al cliente";
 
-    } else if (data.status === 'En curso') {
-      data.statusNote = 'Pedido confirmado';
-
+    } else if (data.status === "En curso") {
+      data.statusNote = "Pedido confirmado";
     }
 
     const idOrder = data.idOrder;
     const status = data.status;
     const statusNote = data.statusNote;
-
     const session = await model.startSession();
     await session.startTransaction();
     try {
+      if(status === "Cancelado por cliente" || status === "Cancelado por la tienda"){
+        if(data.products && data.idStore){
+          for (const product of data.products) {
+            const idProduct = product.idProduct._id;
+            const amount = product.amount;
+            await productModel.updateOne(
+              { '_id': idProduct, 'stores.store': data.idStore },
+              { $inc: { 'stores.$.stock': amount } }
+            );
+          }
+        }
+      }
       const result = await model.updateOne(
         { "_id": idOrder },
         {
@@ -164,17 +146,49 @@ class OrderService {
       throw boom.badRequest(error);
     }
   }
+
+  async findAll() {
+    const result = await model.find({}, {
+      ' _id': 1,
+      'deliveryDate': 1,
+      'status': 1,
+      'total': 1,
+      'store': 1,
+      'userOrder': {
+        'name': 1,
+        'lastname': 1,
+        'motherLastname': 1,
+      },
+      'createdAt': 1,
+      'updatedAt': 1,
+    })
+      .populate('store userOrder.user')
+      .sort({ createdAt: -1 });
+    return await result;
+  }
+
+  async incStock(idProduct, idStore, amount) {
+    const result = await productModel.updateOne(
+      { '_id': idProduct, 'stores.store': idStore },
+      { $inc: { 'stores.$.stock': amount } }
+    );
+    return await result;
+  }
+
 }
 
 
 
+
+// Función para actualizar el estado de las órdenes vencidas
 async function upDateStatusDelivery() {
   try {
     const currentDate = new Date();
 
     const ordersCancel = await model.find({
       deliveryDate: { $lte: currentDate },
-      status: { $ne: 'Cancelado' }, // No actualizar órdenes canceladas
+      status: 'Pendiente',
+      status: 'En curso'
     });
 
     for (const orden of ordersCancel) {

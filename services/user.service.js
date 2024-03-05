@@ -59,6 +59,11 @@ class UserService {
       .exec();
   }
 
+  async findEpecific() {
+    return await User.find({}, 'name nickname lastname phone email image status')
+      .exec();
+  }
+
   // Sustituye a selectUser ya tiene el populate
   async getProfile(id) {
     return await User.findOne({ _id: id })

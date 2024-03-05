@@ -127,4 +127,17 @@ Router.patch(
   },
 );
 
+Router.get(
+  '/find',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    try {
+      const users = await service.findEpecific();
+      res.status(200).json({ data: users });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 module.exports = Router;
