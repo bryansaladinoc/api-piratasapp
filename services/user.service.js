@@ -6,9 +6,6 @@ const bcrypt = require('bcrypt');
 const config = require('../config/config');
 const User = require('../schemas/user.schema');
 
-const postSchema = require('../schemas/post.schema');
-const postModel = mongoose.model('posts', postSchema);
-
 class UserService {
   async login(phone, password) {
     const user = await User.findOne({
@@ -60,7 +57,15 @@ class UserService {
   }
 
   async findEpecific() {
-    return await User.find({}, 'name nickname lastname phone email image status')
+    return await User.find({}, 'name nickname lastname motherlastnamez phone email image status roles')
+      .populate({
+        path: 'roles',
+        model: 'roles',
+        populate: {
+          path: 'permissions',
+          model: 'permissions',
+        },
+      })
       .exec();
   }
 
@@ -125,7 +130,7 @@ class UserService {
     return user;
   }
 
-  // EL SIGUIENTE METODO ACTUALIZA LOS POSTS Y LOS COMENTARIOS DESPUES DE ACTUALIZAR LA INFOMACIÓN DEL USUARIO
+
   async updateUser(idUser, data) {
     const session = await User.startSession();
     await session.startTransaction();
@@ -201,8 +206,11 @@ class UserService {
         { $addToSet: { status: status } }
       );
     }
-
     return result;
+  }
+
+  async findById(id) {
+    return this.getProfile(id);
   }
 
 }

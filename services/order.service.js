@@ -22,6 +22,9 @@ class OrderService {
       data.userEdit = idUser;
       data.userOrder.user = idUser;
       data.store = idStore;
+      let date = new Date();
+      data.deliveryDate = date.setDate(date.getDate() + 3);
+      data.confirmationDate = date.setDate(date.getDate() - 2);
 
       const order = await new model({ ...data });
       await order.save();
@@ -95,12 +98,6 @@ class OrderService {
     if (data.status === "Cancelado por cliente") {
       data.statusNote = "Cancelado por el cliente";
 
-    } else if (data.status === "Cancelado sin confirmación") {
-      data.statusNote = "El vendedor no confirmó la orden";
-
-    } else if (data.status === "Cancelado sin entrega") {
-      data.statusNote = "El cliente no recogio el producto";
-
     } else if (data.status === "Entregado") {
       data.statusNote = "Pedido entregado al cliente";
 
@@ -114,8 +111,8 @@ class OrderService {
     const session = await model.startSession();
     await session.startTransaction();
     try {
-      if(status === "Cancelado por cliente" || status === "Cancelado por la tienda"){
-        if(data.products && data.idStore){
+      if (status === "Cancelado por cliente" || status === "Cancelado por la tienda") {
+        if (data.products && data.idStore) {
           for (const product of data.products) {
             const idProduct = product.idProduct._id;
             const amount = product.amount;
@@ -179,34 +176,85 @@ class OrderService {
 
 
 
-
 // Función para actualizar el estado de las órdenes vencidas
 async function upDateStatusDelivery() {
+  const session = await model.startSession();
+  await session.startTransaction();
   try {
     const currentDate = new Date();
-
     const ordersCancel = await model.find({
       deliveryDate: { $lte: currentDate },
-      status: 'Pendiente',
-      status: 'En curso'
+      status: { $in: ['En curso'] }
     });
 
     for (const orden of ordersCancel) {
-      console.log('Orden vencida:', orden._id);
-      orden.status = 'Cancelado'; // Actualizar el estado según tus necesidades
+      const idStore = orden.store;
+      orden.status = 'Cancelado sin entrega'; // Actualizar el estado según tus necesidades
+      orden.statusNote = 'El cliente no recogió el producto';
+      for (const product of orden.products) {
+        console.log(product);
+        const idProduct = product.idProduct;
+        const amount = product.amount;
+        await productModel.updateOne(
+          { '_id': idProduct, 'stores.store': idStore },
+          { $inc: { 'stores.$.stock': amount } }
+        );
+      }
       await orden.save();
     }
 
-    //console.log('Estados de órdenes vencidas actualizados.');
-    console.log(currentDate);
+    await session.commitTransaction();
+    session.endSession();
+    console.log(currentDate + 'Ordenes vencidas.');
   } catch (error) {
     console.error('Error al actualizar estados de órdenes vencidas:', error);
+    await session.abortTransaction();
+    session.endSession();
+  }
+}
+
+// Función para actualizar el estado de las órdenes no constestadas
+async function upDateStatusConfirm() {
+  const session = await model.startSession();
+  await session.startTransaction();
+  try {
+    const currentDate = new Date();
+    
+    const ordersCancel = await model.find({
+      confirmationDate: { $lte: currentDate },
+      status: { $in: ['Pendiente'] }
+    });
+
+    for (const orden of ordersCancel) {
+      const idStore = orden.store;
+      orden.status = 'Cancelado sin confirmación'; // Actualizar el estado según tus necesidades
+      orden.statusNote = 'El vendedor no confirmó la orden';
+      for (const product of orden.products) {
+        console.log(product);
+        const idProduct = product.idProduct;
+        const amount = product.amount;
+        await productModel.updateOne(
+          { '_id': idProduct, 'stores.store': idStore },
+          { $inc: { 'stores.$.stock': amount } }
+        );
+      }
+      await orden.save();
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+    console.log(currentDate + 'Ordenes no constestadas.');
+  } catch (error) {
+    console.error('Error al actualizar estados de órdenes:', error);
+    await session.abortTransaction();
+    session.endSession();
   }
 }
 
 // Programar la tarea para que se ejecute diariamente
 schedule.scheduleJob('0 0 * * *', () => {
   upDateStatusDelivery();
+  upDateStatusConfirm();
 });
 
 module.exports = OrderService;

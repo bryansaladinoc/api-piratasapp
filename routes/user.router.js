@@ -104,8 +104,8 @@ Router.patch(
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
     try {
-      const result = await service.updateStatus(req.user.sub, { ...req.body });
-      return res.status(201).json({ result });
+      const data = await service.updateStatus(req.user.sub, { ...req.body });
+      return res.status(201).json({ data });
     } catch (e) {
       next(e);
     }
@@ -133,6 +133,22 @@ Router.get(
   async (req, res, next) => {
     try {
       const users = await service.findEpecific();
+      res.status(200).json({ data: users });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+Router.get(
+  '/findById/:userId',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+
+    const {userId} = req.params;
+
+    try {
+      const users = await service.findById(userId);
       res.status(200).json({ data: users });
     } catch (err) {
       next(err);
