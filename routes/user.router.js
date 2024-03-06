@@ -71,7 +71,7 @@ Router.get(
 // );
 
 Router.patch(
-  '/user/update',
+  '/update',
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
     try {
@@ -84,7 +84,7 @@ Router.patch(
 );
 
 Router.patch(
-  '/user/password',
+  '/password',
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
     try {
@@ -104,10 +104,54 @@ Router.patch(
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
     try {
-      const result = await service.updateStatus(req.user.sub, { ...req.body });
+      const data = await service.updateStatus(req.user.sub, { ...req.body });
+      return res.status(201).json({ data });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
+Router.patch(
+  '/phone',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    const data = req.body;
+    console.log(data.phonecode);
+    try {
+      const result = await service.upDatePhone(req.user.sub, data.phone, data.phonecode);
       return res.status(201).json({ result });
     } catch (e) {
       next(e);
+    }
+  },
+);
+
+Router.get(
+  '/find',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    try {
+      const users = await service.findEpecific();
+      res.status(200).json({ data: users });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+Router.get(
+  '/findById/:userId',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+
+    const {userId} = req.params;
+
+    try {
+      const users = await service.findById(userId);
+      res.status(200).json({ data: users });
+    } catch (err) {
+      next(err);
     }
   },
 );

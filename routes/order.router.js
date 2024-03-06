@@ -5,34 +5,25 @@ const service = new OrderService();
 const passport = require('passport');
 
 router.post('/create/', async (req, res, next) => {
-  try {
-    const response = await service.newOrder({...req.body}); // CREA UN NUEVO TICKET
-    res.status(200).json({ data: response });
-  } catch (e) {
-    next(e);
-  }
-});
-
-router.get('/find/all', async (req, res, next) => {
-  try {
-    const response = await service.findAll(); // ENLISTA TODOS LOS TICKETS
-    res.status(200).json({ data: response });
-  } catch (e) {
-    next(e);
-  }
-});
-
-
-router.get('/find/user', 
-async (req, res, next) => {
   const idUser = req.user.sub;
   try {
-    const response = await service.findUser(idUser); // ENLISTA TODOS LOS TICKETS
+    const response = await service.newOrder({ ...req.body }, idUser); // CREA UN NUEVO TICKET
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);
   }
 });
+
+router.get('/find/user',
+  async (req, res, next) => {
+    const idUser = req.user.sub;
+    try {
+      const response = await service.findUser(idUser); // ENLISTA TODOS LOS TICKETS
+      res.status(200).json({ data: response });
+    } catch (e) {
+      next(e);
+    }
+  });
 
 router.get('/find/', async (req, res, next) => {
   const idOrder = req.query.idOrder;
@@ -47,7 +38,16 @@ router.get('/find/', async (req, res, next) => {
 router.patch('/update/status', async (req, res, next) => {
   const idUser = req.user.sub;
   try {
-    const response = await service.updateStatus({...req.body}, idUser); // ENLISTA TODOS LOS TICKETS
+    const response = await service.updateStatus({ ...req.body }, idUser); // ENLISTA TODOS LOS TICKETS
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.get('/find/all', async (req, res, next) => {
+  try {
+    const response = await service.findAll(); // ENLISTA TODOS LOS TICKETS
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);

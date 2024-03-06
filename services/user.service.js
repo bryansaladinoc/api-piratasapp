@@ -6,9 +6,6 @@ const bcrypt = require('bcrypt');
 const config = require('../config/config');
 const User = require('../schemas/user.schema');
 
-const postSchema = require('../schemas/post.schema');
-const postModel = mongoose.model('posts', postSchema);
-
 class UserService {
   async login(phone, password) {
     const user = await User.findOne({
@@ -59,6 +56,19 @@ class UserService {
       .exec();
   }
 
+  async findEpecific() {
+    return await User.find({}, 'name nickname lastname motherlastnamez phone email image status roles')
+      .populate({
+        path: 'roles',
+        model: 'roles',
+        populate: {
+          path: 'permissions',
+          model: 'permissions',
+        },
+      })
+      .exec();
+  }
+
   // Sustituye a selectUser ya tiene el populate
   async getProfile(id) {
     return await User.findOne({ _id: id })
@@ -83,6 +93,7 @@ class UserService {
 
   // ACTUALIZAR CONTRASEÑA DEL USUARIO
   async updateCurrentPass(idUser, data) {
+    console.log('idUser', idUser);
     const session = await User.startSession();
     await session.startTransaction();
     try {
@@ -92,7 +103,6 @@ class UserService {
       }).exec();
 
       //COMPARA LA CONTRASEÑA ENCRIPTADA
-
       const passCompare = await bcrypt.compare(data.currentPass, user.password);
       if (user && passCompare) {
         //ENCRIPTACION DE CONTRASEÑÁ
@@ -101,6 +111,7 @@ class UserService {
 
         await User.updateOne({ _id: idUser }, { password: hashPass }); // CAMBIAR POR hashPass
         await session.commitTransaction();
+        console.log('Contraseña actualizada');
         return true;
       }
       await session.commitTransaction();
@@ -119,13 +130,8 @@ class UserService {
     return user;
   }
 
-  // EL SIGUIENTE METODO ACTUALIZA LOS POSTS Y LOS COMENTARIOS DESPUES DE ACTUALIZAR LA INFOMACIÓN DEL USUARIO
-  async updateUser(idUser, data) {
-    //const validarDatos = validarUsuario();
-    /* if(validarDatos){
-      throw boom.conflict();
-    } */
 
+  async updateUser(idUser, data) {
     const session = await User.startSession();
     await session.startTransaction();
 
@@ -139,62 +145,15 @@ class UserService {
           motherlastname: data.motherlastname,
           email: data.email,
           phonecode: data.phonecode,
-          //phone: data.phone,
           country: data.country,
           state: data.state,
           city: data.city,
           sex: data.sex,
           age: data.age,
           image: data.image,
-          rol: data.rol,
-          /* status: {
-            store: true,
-            food: true,
-            posts: true,
-          } */
         },
         { session },
       );
-
-      // ACTUALIZA LA INFORMACION DEL USARIO EN TODOS LOS POST QUE EL HAYA REALIZADO
-      const filterPost = { 'user.idUser': idUser };
-      const updatePost = await postModel.updateMany(
-        filterPost,
-        {
-          'user.name': data.name,
-          'user.lastname': data.lastname,
-          'user.motherlastname': data.motherlastname,
-          'user.imageUserUri': data.image,
-          'user.rol': data.rol,
-          //'user.status': false,
-        },
-        { session },
-      );
-
-      // ACTUALIZA TODOS LOS  COMENTARIOS QUE EL USUARIO HAYA REALIZADO EN TODOS LOS POSTS
-      const filterComment = { 'comments.idUser': idUser }; // CONDICION PARA EL QUERY
-      const actualizacion = {
-        $set: {
-          'comments.$[element].name': data.name,
-          'comments.$[element].lastname': data.lastname,
-          'comments.$[element].motherlastname': data.motherlastname,
-          'comments.$[element].imageUserUri': data.image,
-          'comments.$[element].rol': data.rol,
-          //'comments.$[element].userStatus': false,
-        },
-      };
-
-      const opciones = {
-        session: session,
-        arrayFilters: [{ 'element.idUser': idUser }], // CONDICION PARA EL ARREGLO
-        multi: true, // IMPORTANTE
-      };
-      const queryD = await postModel.updateMany(
-        filterComment,
-        actualizacion,
-        opciones,
-      );
-
       await session.commitTransaction();
       return true;
     } catch (err) {
@@ -206,7 +165,7 @@ class UserService {
     }
   }
 
-  async upDatePhone(idUser, phone) {
+  async upDatePhone(idUser, phone, phonecode) {
     const session = await User.startSession();
     await session.startTransaction();
     try {
@@ -214,6 +173,7 @@ class UserService {
         { _id: idUser },
         {
           phone: phone,
+          phonecode: phonecode,
         },
         { session },
       );
@@ -234,20 +194,23 @@ class UserService {
       value: data.value,
       userEdit: userEdit,
     };
-  
+
     let result = await User.updateOne(
       { _id: data.idUser, "status.name": data.module },
       { $set: { "status.$": status } }
     );
-    
+
     if (result.modifiedCount === 0) {
       result = await User.updateOne(
         { _id: data.idUser },
         { $addToSet: { status: status } }
       );
     }
-  
     return result;
+  }
+
+  async findById(id) {
+    return this.getProfile(id);
   }
 
 }
