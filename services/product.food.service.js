@@ -21,6 +21,16 @@ class ProductService {
 
     return result;
   }
+
+  async update(id, product) {
+    const res = ProductFood.findOneAndUpdate({ _id: id }, product).exec();
+    return res;
+  }
+
+  async delete(id) {
+    const product = ProductFood.findOneAndDelete({ _id: id }).exec();
+    return product;
+  }
 }
 
 module.exports = ProductService;

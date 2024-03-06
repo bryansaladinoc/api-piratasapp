@@ -13,7 +13,6 @@ class OrderService {
   async newOrder(data) {
     data.status = 'Pendiente';
     data.statusNote = 'Pendiente de confirmación';
-    console.log(data.deliveryKey);
 
     const deliveryKeyEncrypted = encrypt(data.deliveryKey);
     data.deliveryKey = JSON.stringify(deliveryKeyEncrypted);
@@ -21,15 +20,14 @@ class OrderService {
     const session = await model.startSession();
     await session.startTransaction();
     try {
-      const user = await userModel.findOne({ '_id': data.user.idUser });
+      const user = await userModel.findOne({ _id: data.user.idUser });
       data.userEdit = {
         idUser: user._id,
         name: user.name,
         lastname: user.lastname,
         motherLastname: user.motherlastname,
-        phone: user.phone
+        phone: user.phone,
       };
-
 
       const order = await new model({ ...data });
       await order.save();
@@ -40,8 +38,8 @@ class OrderService {
         const amount = product.amount;
         //BUSCAR STOCK
         const findStock = await productModel.findOne(
-          { '_id': idProduct, 'store.idStore': idStore },
-          { 'store.$': 1 }
+          { _id: idProduct, 'store.idStore': idStore },
+          { 'store.$': 1 },
         );
 
         //SI NO HAY STOCK
@@ -49,8 +47,8 @@ class OrderService {
           throw new Error('No hay suficiente stock');
         } else {
           await productModel.updateOne(
-            { '_id': idProduct, 'store.idStore': idStore },
-            { $inc: { 'store.$.stock': -amount } }
+            { _id: idProduct, 'store.idStore': idStore },
+            { $inc: { 'store.$.stock': -amount } },
           );
         }
       }
@@ -67,31 +65,41 @@ class OrderService {
   }
 
   async findAll() {
-    const result = await model.find({}, {
-      ' _id': 1,
-      'deliveryDate': 1,
-      'status': 1,
-      'total': 1,
-      'store': 1,
-      'user': 1,
-      'createdAt': 1,
-      'updatedAt': 1,
-    }).sort({ createdAt: -1 });
+    const result = await model
+      .find(
+        {},
+        {
+          ' _id': 1,
+          deliveryDate: 1,
+          status: 1,
+          total: 1,
+          store: 1,
+          user: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      )
+      .sort({ createdAt: -1 });
     return await result;
   }
 
   async findUser(idUser) {
-    let result = await model.find({ "user.idUser": idUser }, {
-      ' _id': 1,
-      'createdAt': 1,
-      'total': 1,
-      'status': 1,
-      'store.name': 1,
-      'deliveryDate': 1,
-      'deliveryKey': 1,
-    }).sort({ createdAt: -1 });
-  
-    result = result.map(item => {
+    let result = await model
+      .find(
+        { 'user.idUser': idUser },
+        {
+          ' _id': 1,
+          createdAt: 1,
+          total: 1,
+          status: 1,
+          'store.name': 1,
+          deliveryDate: 1,
+          deliveryKey: 1,
+        },
+      )
+      .sort({ createdAt: -1 });
+
+    result = result.map((item) => {
       const deliveryKeyObject = JSON.parse(item.deliveryKey);
       item.deliveryKey = decrypt(deliveryKeyObject);
       return item;
@@ -101,7 +109,7 @@ class OrderService {
   }
 
   async find(idOrder) {
-    const result = await model.findOne({ "_id": idOrder });
+    const result = await model.findOne({ _id: idOrder });
     const deliveryKeyObject = JSON.parse(result.deliveryKey);
     result.deliveryKey = decrypt(deliveryKeyObject);
     return await result;
@@ -110,19 +118,14 @@ class OrderService {
   async updateStatus(data, userLogged) {
     if (data.status === 'Cancelado por cliente') {
       data.statusNote = 'Cancelado por el cliente';
-
     } else if (data.status === 'Cancelado sin confirmación') {
       data.statusNote = 'El vendedor no confirmó la orden';
-
     } else if (data.status === 'Cancelado sin entrega') {
       data.statusNote = 'El cliente no recogio el producto';
-
     } else if (data.status === 'Entregado') {
       data.statusNote = 'Pedido entregado al cliente';
-
     } else if (data.status === 'En curso') {
       data.statusNote = 'Pedido confirmado';
-
     }
 
     const idOrder = data.idOrder;
@@ -132,24 +135,24 @@ class OrderService {
     const session = await model.startSession();
     await session.startTransaction();
     try {
-      const user = await userModel.findOne({ '_id': userLogged });
+      const user = await userModel.findOne({ _id: userLogged });
       const userEdit = {
         idUser: user._id,
         name: user.name,
         lastname: user.lastname,
         motherLastname: user.motherlastname,
-        phone: user.phone
+        phone: user.phone,
       };
 
       const result = await model.updateOne(
-        { "_id": idOrder },
+        { _id: idOrder },
         {
           $set: {
-            "status": status,
-            "statusNote": statusNote,
-            "userEdit": userEdit
-          }
-        }
+            status: status,
+            statusNote: statusNote,
+            userEdit: userEdit,
+          },
+        },
       );
 
       await session.commitTransaction();
