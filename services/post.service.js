@@ -76,6 +76,15 @@ class PostService {
       },
       { "$unwind": "$rolesDetails" },
       {
+        "$lookup": {
+          "from": "members",
+          "localField": "userDetails.member.idMember",
+          "foreignField": "_id",
+          "as": "memberDetails",
+        },
+      },
+      { "$unwind": {"path": "$memberDetails", "preserveNullAndEmptyArrays": true}},
+      {
         "$project": {
           "user": {
             "_id": { "$ifNull": ["$userDetails._id", null] },
@@ -88,6 +97,8 @@ class PostService {
             "_id": { "$ifNull": ["$rolesDetails._id", null] },
             "name": { "$ifNull": ["$rolesDetails.name", null] },
           },
+          "memberDetails": 1,
+          "memberActive": { "$ifNull": ["$userDetails.member.active", false] },
           "_id": 1,
           "content": 1,
           "contentType": 1,
@@ -114,7 +125,7 @@ class PostService {
       { "$skip": (page - 1) * 30 },
       { "$limit": 30 },
     ]);
-    //console.log('allPost ' + result.length);
+    console.log('allPost ' + result.length);
     return await result;
   }
 
@@ -143,6 +154,15 @@ class PostService {
       },
       { "$unwind": "$rolesDetails" },
       {
+        "$lookup": {
+          "from": "members",
+          "localField": "userDetails.member.idMember",
+          "foreignField": "_id",
+          "as": "memberDetails",
+        },
+      },
+      { "$unwind": {"path": "$memberDetails", "preserveNullAndEmptyArrays": true}},
+      {
         "$project": {
           "user": {
             "_id": { "$ifNull": ["$userDetails._id", null] },
@@ -155,6 +175,8 @@ class PostService {
             "_id": { "$ifNull": ["$rolesDetails._id", null] },
             "name": { "$ifNull": ["$rolesDetails.name", null] },
           },
+          "memberDetails": 1,
+          "memberActive": { "$ifNull": ["$userDetails.member.active", false] },
           "_id": 1,
           "content": 1,
           "contentType": 1,
