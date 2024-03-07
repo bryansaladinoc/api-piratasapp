@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 
 const OrderFoodSchema = new mongoose.Schema(
   {
-    deliveryTime: Number,
-    description: String,
-    image: String,
-    name: String,
-    paymentMethod: { type: String, required: true },
+    store: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'storesfood',
+      required: true,
+    },
     products: [
       {
         __v: Number,
@@ -20,17 +20,21 @@ const OrderFoodSchema = new mongoose.Schema(
         title: String,
       },
     ],
-    qualify: String,
-    row: { type: String, required: true },
-    seat: { type: Number, required: true },
-    section: { type: Number, required: true },
-    storeId: { type: String, required: true },
+    deliveryTime: { type: String, default: '' },
+    paymentMethod: { type: String },
+    row: { type: String },
+    seat: { type: Number },
+    section: { type: Number },
     status: { type: String, required: true },
     subtotalPayment: Number,
     totalPayment: { type: Number, required: true },
-    userId: { type: String, required: true },
     securityCode: { type: String, required: true },
     payment: { type: String },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'user',
+      required: true,
+    },
   },
   {
     timestamps: true,

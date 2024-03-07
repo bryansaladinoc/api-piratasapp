@@ -27,6 +27,34 @@ Router.post('/', async (req, res, next) => {
     const product = req.body;
     const result = await service.create(product);
 
+    req.app.io.emit('products', result);
+
+    res.status(201).json({ data: result });
+  } catch (e) {
+    next(e);
+  }
+});
+
+Router.put('/:id', async (req, res, next) => {
+  try {
+    const product = req.body;
+    const id = req.params.id;
+    const result = await service.update(id, product);
+
+    req.app.io.emit('products', result);
+
+    res.status(201).json({ data: result });
+  } catch (e) {
+    next(e);
+  }
+});
+
+Router.delete('/:id', async (req, res, next) => {
+  try {
+    const result = await service.delete(req.params.id);
+
+    req.app.io.emit('products', result);
+
     res.status(201).json({ data: result });
   } catch (e) {
     next(e);

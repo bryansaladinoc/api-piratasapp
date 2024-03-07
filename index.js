@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
 
 const config = require('./config/config');
 const routerApi = require('./routes');
@@ -11,6 +13,19 @@ const {
 } = require('./middlewares/error.handler');
 const main = require('./libs/mongodb');
 require('./utils/auth');
+
+//Config socket.io
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['my-custom-header'],
+    credentials: true,
+  },
+});
+
+app.io = io;
 
 app.use(cors());
 app.use(express.json({ limit: '1000mb' }));
@@ -32,6 +47,11 @@ app.use(errorHandler);
 
 mongoDbInit();
 
-app.listen(config.PORT, () => {
+io.on('connection', (socket) => {
+  console.log('New client connected');
+  socket.on('disconnect', () => console.log('Client disconnected'));
+});
+
+server.listen(config.PORT, () => {
   console.log('Server PiratasApp Ready on port', config.PORT);
 });

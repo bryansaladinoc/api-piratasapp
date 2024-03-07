@@ -24,11 +24,14 @@ router.get('/:id', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    const result = await service.create({
+    const article = await service.create({
       ...req.body,
       createBy: req.user.sub,
     });
-    res.status(201).json({ data: result });
+
+    req.app.io.emit('articles', article);
+
+    res.status(201).json({ data: article });
   } catch (e) {
     next(e);
   }
@@ -46,6 +49,9 @@ router.put('/:id', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
   try {
     const result = await service.delete(req.params.id);
+
+    req.app.io.emit('articles', result);
+
     res.status(201).json({ data: result });
   } catch (e) {
     next(e);

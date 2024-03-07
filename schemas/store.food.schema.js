@@ -6,6 +6,7 @@ const StoreFoodSchema = new mongoose.Schema({
   image: String,
   deliveryTime: Number,
   qualify: String,
+  deliveryOption: Boolean,
 });
 
 module.exports = mongoose.model('storesfood', StoreFoodSchema);
