@@ -5,6 +5,7 @@ const memberSchema = mongoose.Schema({
   color: String,
   price: Number,
   periodicity: Number,
+  status: Boolean,
   userEdit: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
   includesMember: String,
 }, { timestamps: true},

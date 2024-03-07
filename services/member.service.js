@@ -6,13 +6,26 @@ const boom = require('@hapi/boom');
 
 class memberService {
     async find() {
-        const response = await model.find()
+        const result = await model.find()
             .populate({ path: 'userEdit', select: 'name email nickname name lastname motherlastname phone' });
-        return response;
+        return result;
+    }
+
+    async findActive() {
+        const result = await model.find({ status: true })
+            .populate({ path: 'userEdit', select: 'name email nickname name lastname motherlastname phone' });
+        return result;
+    }
+
+    async findById(id) {
+        const result = await model.findById(id)
+            .populate({ path: 'userEdit', select: 'name email nickname name lastname motherlastname phone' });
+        return result;
     }
 
     async create(data, idUser) {
         data.userEdit = idUser;
+        data.status = true;
         const result = await new model({ ...data });
         await result.save();
         return await result;
@@ -39,6 +52,37 @@ class memberService {
             session.endSession();
             throw boom.badRequest('Error al asignar la membresia');
         }
+    }
+
+    async updateMember(data, idUser) {
+        const result = await model.updateOne({ _id: data._id }, { $set: { ...data, userEdit: idUser } });
+        return result;
+    }
+    
+    async deleteMember(idMember) {
+        const result = await model.deleteOne({ _id: idMember });
+        return result;
+    }
+
+
+    async findUsersMembers() {
+        const result = await modelUser.find({
+            member: { $ne: {} },
+            _id: { $ne: '65e0ec77e101dcd98c066cf9' }
+        }, 'name nickname lastname motherlastname phone email image member')
+        .populate({ path: 'member.idMember', select: 'name price' });
+
+        console.log(result.length);
+        return result;
+    }
+
+    async findUsersNoMembers() {
+        const result = await modelUser.find({
+            member: {},
+            _id: { $ne: '65e0ec77e101dcd98c066cf9' }
+        },'name nickname lastname motherlastname phone email image');
+        console.log(result.length);
+        return result;
     }
 };
 
