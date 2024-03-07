@@ -16,6 +16,7 @@ const orderFoodRouter = require('./order.food.router');
 const countryRouter = require('./country.router');
 const roleRouter = require('./role.router');
 const permissionRouter = require('./permission.router');
+const memberRouter = require('./member.router');
 const { userStatus } = require('../middlewares/statuspost.handler');
 
 const routerApi = (app) => {
@@ -46,6 +47,12 @@ const routerApi = (app) => {
     passport.authenticate('jwt', { session: false }),
     (req, res, next) => userStatus(req, res, next, { search: 'store' }),
     productRouter
+  );
+
+  router.use(
+    '/members',
+    passport.authenticate('jwt', { session: false }),
+    memberRouter,
   );
 
   router.use(
