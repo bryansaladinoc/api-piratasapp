@@ -80,7 +80,7 @@ class memberService {
 
   async findUsersMembers() {
     const result = await modelUser.find({
-      member: { $ne: {} },
+      member: { $ne: null },
       _id: { $ne: '65e0ec77e101dcd98c066cf9' }
     }, 'name nickname lastname motherlastname phone email image member')
       .populate({ path: 'member.idMember', select: 'name price' });
@@ -91,7 +91,7 @@ class memberService {
 
   async findUsersNoMembers() {
     const result = await modelUser.find({
-      member: {},
+      member: null,
       _id: { $ne: '65e0ec77e101dcd98c066cf9' }
     }, 'name nickname lastname motherlastname phone email image');
     console.log(result.length);
@@ -99,7 +99,7 @@ class memberService {
   }
 
   async deleteMemberUser(idUser) {
-    const result = await modelUser.updateOne({ _id: idUser }, { $set: { member: {} } });
+    const result = await modelUser.updateOne({ _id: idUser }, { $set: { member: null } });
     return result;
   }
 
@@ -108,7 +108,7 @@ class memberService {
 
 const findAndDelete = async () => {
   const cancelMemberUser =
-  await modelUser.updateMany({ 'member.endDay': { $lte: new Date() } }, { $set: { member: {} } });
+  await modelUser.updateMany({ 'member.endDay': { $lte: new Date() } }, { $set: { member: null } });
   console.log('Cancelados: ', cancelMemberUser.nModified);
 };
 
