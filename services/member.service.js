@@ -81,7 +81,7 @@ class memberService {
   async findUsersMembers() {
     const result = await modelUser.find({
       member: { $ne: null },
-      _id: { $ne: '65e0ec77e101dcd98c066cf9' }
+      _id: { $ne: '65eb36414b4ceb3e340e6a1c' }
     }, 'name nickname lastname motherlastname phone email image member')
       .populate({ path: 'member.idMember', select: 'name price' });
 
@@ -92,7 +92,7 @@ class memberService {
   async findUsersNoMembers() {
     const result = await modelUser.find({
       member: null,
-      _id: { $ne: '65e0ec77e101dcd98c066cf9' }
+      _id: { $ne: '65eb36414b4ceb3e340e6a1c' }
     }, 'name nickname lastname motherlastname phone email image');
     console.log(result.length);
     return result;

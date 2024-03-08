@@ -65,6 +65,7 @@ class PostService {
           "as": "userDetails",
         }
       },
+      { "$sort": { "createdAt": -1 } },
       { "$unwind": "$userDetails" },
       {
         "$lookup": {
@@ -121,9 +122,7 @@ class PostService {
           }
         }
       },
-      { "$sort": { "createdAt": -1 } },
-      { "$skip": (page - 1) * 30 },
-      { "$limit": 30 },
+      { "$limit": 400 },
     ]);
     console.log('allPost ' + result.length);
     return await result;
