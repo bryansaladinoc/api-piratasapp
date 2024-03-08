@@ -50,27 +50,25 @@ router.post('/', async (req, res, next) => {
 
     req.app.io.emit('orders', order);
 
-    const notification = new OneSignal.Notification();
-    notification.app_id = '9e3a4ffb-b6b8-4533-803a-6f8d1c95feb9';
-    // Name property may be required in some case, for instance when sending an SMS.
-    notification.name = 'test_notification_name';
-    notification.contents = {
-      en: "Gig'em Ags",
-    };
+    // const notification = new OneSignal.Notification();
+    // notification.app_id = '9e3a4ffb-b6b8-4533-803a-6f8d1c95feb9';
+    // // Name property may be required in some case, for instance when sending an SMS.
+    // notification.name = 'test_notification_name';
+    // notification.contents = {
+    //   en: "Gig'em Ags",
+    // };
 
-    // required for Huawei
-    notification.headings = {
-      en: "Gig'em Ags",
-    };
+    // // required for Huawei
+    // notification.headings = {
+    //   en: "Gig'em Ags",
+    // };
 
-    // This example uses segments, but you can also use filters or target individual users
-    // https://documentation.onesignal.com/reference/create-notification
-    notification.included_segments = ['Total Subscriptions'];
+    // // This example uses segments, but you can also use filters or target individual users
+    // // https://documentation.onesignal.com/reference/create-notification
+    // notification.included_segments = ['Total Subscriptions'];
 
-    const notificationResponse =
-      await MyClientOneSignal.createNotification(notification);
-
-    console.log('Notification response:', notificationResponse);
+    // const notificationResponse =
+    //   await MyClientOneSignal.createNotification(notification);
 
     res.status(201).json({ data: order });
   } catch (e) {

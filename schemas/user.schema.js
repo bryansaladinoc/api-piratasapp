@@ -21,7 +21,7 @@ const userSchema = mongoose.Schema(
     sex: String,
     age: Number,
     image: String,
-    member:{
+    member: {
       idMember: { type: mongoose.Schema.Types.ObjectId, ref: 'members' },
       dateUpdate: Date,
       endDay: Date,

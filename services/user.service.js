@@ -95,7 +95,8 @@ class UserService {
       .populate({
         path: 'stores.food.userEdit',
         model: 'user',
-      }).populate({
+      })
+      .populate({
         path: 'member.idMember',
         model: 'members',
       })
