@@ -50,13 +50,6 @@ router.post('/', async (req, res, next) => {
 
     req.app.io.emit('orders', order);
 
-    const configuration = OneSignal.createConfiguration({
-      userKey: '9e3a4ffb-b6b8-4533-803a-6f8d1c95feb9',
-      appKey: 'MDNhNWIxNjQtYzk4Mi00ODI5LTk3ZmQtZTVjYjYxZGFlOWYy',
-    });
-
-    const client = new OneSignal.DefaultApi(configuration);
-
     const notification = new OneSignal.Notification();
     notification.app_id = '9e3a4ffb-b6b8-4533-803a-6f8d1c95feb9';
     // Name property may be required in some case, for instance when sending an SMS.
@@ -74,7 +67,8 @@ router.post('/', async (req, res, next) => {
     // https://documentation.onesignal.com/reference/create-notification
     notification.included_segments = ['Total Subscriptions'];
 
-    const notificationResponse = await client.createNotification(notification);
+    const notificationResponse =
+      await MyClientOneSignal.createNotification(notification);
 
     console.log('Notification response:', notificationResponse);
 
