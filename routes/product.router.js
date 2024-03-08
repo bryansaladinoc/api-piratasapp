@@ -42,9 +42,9 @@ router.post('/create/store', async (req, res, next) => {
   }
 });
 
-router.get('/find/store', async (req, res, next) => {
-  const idProduct = req.query.idProduct;
-  const nameStore = req.query.nameStore;
+router.get('/find/store/:idProduct/:nameStore', async (req, res, next) => {
+  const idProduct = req.params.idProduct;
+  const nameStore = req.params.nameStore;
   try {
     const response = await service.findInStore(idProduct, nameStore); // BUSCA UN PRODUCTO EN UNA TIENDA
     res.status(200).json({ data: response });
