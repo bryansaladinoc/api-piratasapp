@@ -22,8 +22,8 @@ router.get('/find/active', async (req, res, next) => {
   }
 });
 
-router.get('/find/', async (req, res, next) => {
-  const idProd = req.query.idProd;
+router.get('/find/:idProd', async (req, res, next) => {
+  const idProd = req.params.idProd;
   try {
     const response = await service.findActive(idProd); // INFORMACION DE UN PRODUCTO
     res.status(200).json({ data: response });
@@ -44,18 +44,9 @@ router.post('/create/store', async (req, res, next) => {
 
 
 
-
-
-
-
-
-
-
-
-
-router.get('/find/store', async (req, res, next) => {
-  const idProduct = req.query.idProduct;
-  const nameStore = req.query.nameStore;
+router.get('/find/store/:idProduct/:nameStore', async (req, res, next) => {
+  const idProduct = req.params.idProduct;
+  const nameStore = req.params.nameStore;
   try {
     const response = await service.findInStore(idProduct, nameStore); // BUSCA UN PRODUCTO EN UNA TIENDA
     res.status(200).json({ data: response });

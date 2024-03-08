@@ -49,18 +49,16 @@ class ProductService {
   async findActive(idProd) {
     const result = await model.aggregate([
       {
-        $match: {
-          _id: new mongoose.Types.ObjectId(idProd),
-        },
+        "$match": { "_id": new mongoose.Types.ObjectId(idProd) } // Busca por el ID del producto
       },
       {
         $unwind: '$stores',
       },
       {
-        $match: {
-          'stores.stock': { $ne: 0 },
-          'stores.status': true,
-        },
+        "$match": {
+          "totalStock": { "$ne": 0 }, // Excluye productos con suma de stock igual a 0
+          "status": { "$ne": false },
+        }
       },
       {
         $lookup: {
