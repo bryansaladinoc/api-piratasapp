@@ -10,7 +10,7 @@ class PostService {
     const result = await new model(
       { ...dataPost });
     await result.save();
-    console.log('createPost ' + result._id);
+    //console.log('createPost ' + result._id);
     return await result;
   }
 
@@ -49,7 +49,7 @@ class PostService {
       },
     ]);
 
-    console.log('postUser ' + result.length);
+    //console.log('postUser ' + result.length);
     return await result;
   }
 
@@ -63,9 +63,27 @@ class PostService {
           "localField": "user",
           "foreignField": "_id",
           "as": "userDetails",
-        },
+        }
       },
       { "$unwind": "$userDetails" },
+      {
+        "$lookup": {
+          "from": "roles",
+          "localField": "userDetails.roles",
+          "foreignField": "_id",
+          "as": "rolesDetails",
+        },
+      },
+      { "$unwind": "$rolesDetails" },
+      {
+        "$lookup": {
+          "from": "members",
+          "localField": "userDetails.member.idMember",
+          "foreignField": "_id",
+          "as": "memberDetails",
+        },
+      },
+      { "$unwind": {"path": "$memberDetails", "preserveNullAndEmptyArrays": true}},
       {
         "$project": {
           "user": {
@@ -75,6 +93,12 @@ class PostService {
             "image": { "$ifNull": ["$userDetails.image", null] },
             "status": { "$ifNull": ["$userDetails.status", []] },
           },
+          "rolesDetails": {
+            "_id": { "$ifNull": ["$rolesDetails._id", null] },
+            "name": { "$ifNull": ["$rolesDetails.name", null] },
+          },
+          "memberDetails": 1,
+          "memberActive": { "$ifNull": ["$userDetails.member.active", false] },
           "_id": 1,
           "content": 1,
           "contentType": 1,
@@ -106,27 +130,53 @@ class PostService {
   }
 
   async findLastPostUser(userId) {
+
     const result = await model.aggregate([
       { "$match": { "user": new mongoose.Types.ObjectId(userId) } },
       { "$sort": { "createdAt": -1 } },
       { "$limit": 1 },
       {
         "$lookup": {
-          "from": "users", // Reemplaza con el nombre de tu colección de usuarios
+          "from": "users",
           "localField": "user",
-          "foreignField": "_id",// Campos que quieres obtener del usuario
-          "as": "user"
+          "foreignField": "_id",
+          "as": "userDetails",
         }
       },
-      { "$unwind": "$user" },
+      { "$unwind": "$userDetails" },
+      {
+        "$lookup": {
+          "from": "roles",
+          "localField": "userDetails.roles",
+          "foreignField": "_id",
+          "as": "rolesDetails",
+        },
+      },
+      { "$unwind": "$rolesDetails" },
+      {
+        "$lookup": {
+          "from": "members",
+          "localField": "userDetails.member.idMember",
+          "foreignField": "_id",
+          "as": "memberDetails",
+        },
+      },
+      { "$unwind": {"path": "$memberDetails", "preserveNullAndEmptyArrays": true}},
       {
         "$project": {
           "user": {
-            "_id": 1,
-            "name": 1,
-            "nickname": 1,
-            "image": 1,
+            "_id": { "$ifNull": ["$userDetails._id", null] },
+            "name": { "$ifNull": ["$userDetails.name", null] },
+            "nickname": { "$ifNull": ["$userDetails.nickname", null] },
+            "image": { "$ifNull": ["$userDetails.image", null] },
+            "status": { "$ifNull": ["$userDetails.status", []] },
           },
+          "rolesDetails": {
+            "_id": { "$ifNull": ["$rolesDetails._id", null] },
+            "name": { "$ifNull": ["$rolesDetails.name", null] },
+          },
+          "memberDetails": 1,
+          "memberActive": { "$ifNull": ["$userDetails.member.active", false] },
           "_id": 1,
           "content": 1,
           "contentType": 1,
@@ -134,11 +184,23 @@ class PostService {
           "likes": 1,
           "createdAt": 1,
           "countLikes": { "$size": '$likes' },
-          "countComments": { "$size": '$comments' }
+          "countComments": { "$size": '$comments' },
+        },
+      },
+      {
+        "$match": {
+          "user.status": {
+            "$not": {
+              "$elemMatch": {
+                "name": "posts",
+                "value": false
+              }
+            }
+          }
         }
       }
     ]);
-    console.log('lastPostUser ' + result.length);
+    //console.log('lastPostUser ' + result.length);
     return await result;
   }
 
@@ -190,7 +252,7 @@ class PostService {
         }
       }
     ]);
-    console.log(result);
+    //console.log(result);
     if (result.length === 0) {
       throw boom.notFound('Post not found');
     }

@@ -26,10 +26,8 @@ class StoreService {
   }
 
   async findNoEmployees(role = "user") {
-
     let match = {
       "roles.name": role,
-      "stores.market": { $size: 0 },
       "status": { $not: { $elemMatch: { "name": "store", "value": false } } },
       $or: [
         { "status.name": { $ne: "store" } },
@@ -37,18 +35,6 @@ class StoreService {
         { "status": { $elemMatch: { "name": "store", "value": true } } }
       ]
     };
-
-    if (role === "employeeStore") {
-      match = {
-        "roles.name": role,
-        "status": { $not: { $elemMatch: { "name": "store", "value": false } } },
-        $or: [
-          { "status.name": { $ne: "store" } },
-          { "status": { $exists: false } },
-          { "status": { $elemMatch: { "name": "store", "value": true } } }
-        ]
-      };
-    }
 
     const result = await modelUser.aggregate([
       {
@@ -84,6 +70,8 @@ class StoreService {
     try {
       const idUser = data.idUser;
       const findRole = await roles.findOne({ "name": "employeeStore" });
+      const findRoleUser = await roles.findOne({ "name": "user" });
+
 
       if (data.stores && data.stores.length > 0) {
         for (const store of data.stores) {
@@ -104,11 +92,22 @@ class StoreService {
         }
       }
 
-      const updateUser = await modelUser.updateOne({ "_id": idUser }, { $set: { "roles": findRole._id } });
+      const findMarket = await modelUser.findOne({ "_id": idUser }, 'stores');
 
-      await session.commitTransaction();
-      session.endSession();
-      return updateUser;
+      const find = findMarket.stores.market.find(element => element.value == true);
+
+
+      if (find) {
+        const upDateRol = await modelUser.updateOne({ "_id": idUser }, { $set: { "roles": findRole._id } });
+        await session.commitTransaction();
+        session.endSession();
+        return upDateRol;
+      } else {
+        const upDateRol = await modelUser.updateOne({ "_id": idUser }, { $set: { "roles": findRoleUser._id } });
+        await session.commitTransaction();
+        session.endSession();
+        return upDateRol;
+      }
     }
     catch (error) {
       await session.abortTransaction();

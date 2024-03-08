@@ -21,6 +21,13 @@ const userSchema = mongoose.Schema(
     sex: String,
     age: Number,
     image: String,
+    member:{
+      idMember: { type: mongoose.Schema.Types.ObjectId, ref: 'members' },
+      dateUpdate: Date,
+      endDay: Date,
+      active: Boolean,
+      userEdit: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+    },
     roles: [{ type: mongoose.Schema.Types.ObjectId, ref: 'roles' }],
     status: [
       {
