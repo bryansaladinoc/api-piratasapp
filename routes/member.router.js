@@ -33,7 +33,6 @@ router.get('/active', async (req, res, next) => {
 
 router.get('/id/:idMember', async (req, res, next) => {
   const { idMember } = req.params;
-  console.log(idMember);
   try {
     const response = await service.findById(idMember); // ENLISTA TODAS LAS TIENDAS
     res.status(200).json({ data: response });
@@ -75,6 +74,16 @@ router.patch('/update', async (req, res, next) => {
   try {
     const response = await service.updateMember({...req.body}, idUser); // ENLISTA TODAS LAS TIENDAS
     res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.patch('/deltouser/:idUser', async (req, res, next) => {
+  const { idUser } = req.params;
+  try {
+    const data = await service.deleteMemberUser(idUser); // ENLISTA TODAS LAS TIENDAS
+    res.status(200).json({ data });
   } catch (e) {
     next(e);
   }
