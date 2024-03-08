@@ -50,4 +50,8 @@ const userSchema = mongoose.Schema(
   { timestamps: true },
 );
 
+userSchema.add({
+  notificationToken: { type: String, default: '' },
+});
+
 module.exports = mongoose.model('user', userSchema);
