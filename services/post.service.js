@@ -1,9 +1,12 @@
 const mongoose = require('mongoose');
 const postSchema = require('../schemas/post.schema');
+const uriSchema = require('../schemas/uris.schema');
 const boom = require('@hapi/boom');
 const model = mongoose.model('posts', postSchema);
 const modelUser = require('../schemas/user.schema');
 const modelRoles = require('../schemas/role.schema');
+const modelUris = mongoose.model('uris', uriSchema);
+
 
 
 class PostService {
@@ -153,7 +156,7 @@ class PostService {
       { "$limit": 400 },
     ]);
 
-    console.log('allPost ' + result.length);
+    //console.log('allPost ' + result.length);
     return await result;
   }
 
@@ -422,6 +425,11 @@ class PostService {
       return true;
     });
     return await filterUserStatus.length;
+  }
+
+  async findUries() {
+    const result = await modelUris.find();
+    return await result;
   }
 }
 
