@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const boom = require('@hapi/boom');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -56,8 +55,17 @@ class UserService {
       .exec();
   }
 
+  async update(id, data) {
+    const user = await User.findOneAndUpdate({ _id: id }, data).exec();
+
+    return user;
+  }
+
   async findEpecific() {
-    return await User.find({}, 'name nickname lastname motherlastnamez phone email image status roles')
+    return await User.find(
+      {},
+      'name nickname lastname motherlastnamez phone email image status roles',
+    )
       .populate({
         path: 'roles',
         model: 'roles',
@@ -87,7 +95,8 @@ class UserService {
       .populate({
         path: 'stores.food.userEdit',
         model: 'user',
-      }).populate({
+      })
+      .populate({
         path: 'member.idMember',
         model: 'members',
       })
@@ -132,7 +141,6 @@ class UserService {
     const user = await User.findOne({ _id: idUser }).exec();
     return user;
   }
-
 
   async updateUser(idUser, data) {
     const session = await User.startSession();
@@ -199,14 +207,14 @@ class UserService {
     };
 
     let result = await User.updateOne(
-      { _id: data.idUser, "status.name": data.module },
-      { $set: { "status.$": status } }
+      { _id: data.idUser, 'status.name': data.module },
+      { $set: { 'status.$': status } },
     );
 
     if (result.modifiedCount === 0) {
       result = await User.updateOne(
         { _id: data.idUser },
-        { $addToSet: { status: status } }
+        { $addToSet: { status: status } },
       );
     }
     return result;
@@ -215,7 +223,6 @@ class UserService {
   async findById(id) {
     return this.getProfile(id);
   }
-
 }
 
 module.exports = UserService;

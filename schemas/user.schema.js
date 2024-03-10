@@ -21,7 +21,7 @@ const userSchema = mongoose.Schema(
     sex: String,
     age: Number,
     image: String,
-    member:{
+    member: {
       idMember: { type: mongoose.Schema.Types.ObjectId, ref: 'members' },
       dateUpdate: Date,
       endDay: Date,
@@ -56,5 +56,9 @@ const userSchema = mongoose.Schema(
   },
   { timestamps: true },
 );
+
+userSchema.add({
+  notificationToken: { type: String, default: '' },
+});
 
 module.exports = mongoose.model('user', userSchema);

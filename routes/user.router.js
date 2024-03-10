@@ -18,7 +18,6 @@ Router.get(
   },
 );
 
-
 Router.post('/signin', async (req, res, next) => {
   try {
     const { phone, password } = req.body;
@@ -69,7 +68,6 @@ Router.get(
 //     }
 //   },
 // );
-
 Router.patch(
   '/update',
   passport.authenticate('jwt', { session: false }),
@@ -119,7 +117,11 @@ Router.patch(
     const data = req.body;
     console.log(data.phonecode);
     try {
-      const result = await service.upDatePhone(req.user.sub, data.phone, data.phonecode);
+      const result = await service.upDatePhone(
+        req.user.sub,
+        data.phone,
+        data.phonecode,
+      );
       return res.status(201).json({ result });
     } catch (e) {
       next(e);
@@ -140,12 +142,24 @@ Router.get(
   },
 );
 
+Router.put(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res, next) => {
+    try {
+      const result = await service.update(req.user.sub, req.body);
+      return res.status(201).json({ data: result });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+
 Router.get(
   '/findById/:userId',
   passport.authenticate('jwt', { session: false }),
   async (req, res, next) => {
-
-    const {userId} = req.params;
+    const { userId } = req.params;
 
     try {
       const users = await service.findById(userId);

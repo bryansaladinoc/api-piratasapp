@@ -14,16 +14,15 @@ router.post('/create/', async (req, res, next) => {
   }
 });
 
-router.get('/find/user',
-  async (req, res, next) => {
-    const idUser = req.user.sub;
-    try {
-      const response = await service.findUser(idUser); // ENLISTA TODOS LOS TICKETS
-      res.status(200).json({ data: response });
-    } catch (e) {
-      next(e);
-    }
-  });
+router.get('/find/user', async (req, res, next) => {
+  const idUser = req.user.sub;
+  try {
+    const response = await service.findUser(idUser); // ENLISTA TODOS LOS TICKETS
+    res.status(200).json({ data: response });
+  } catch (e) {
+    next(e);
+  }
+});
 
 router.get('/find/', async (req, res, next) => {
   const idOrder = req.query.idOrder;

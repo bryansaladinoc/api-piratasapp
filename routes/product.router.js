@@ -6,7 +6,7 @@ const service = new ProductService();
 router.post('/create', async (req, res, next) => {
   const idUser = req.user.sub;
   try {
-    const response = await service.new({ ...req.body}, idUser);
+    const response = await service.new({ ...req.body }, idUser);
     res.status(200).json({ data: response }); // REGISTRAR  NUEVO PRODUCTO
   } catch (e) {
     next(e);
@@ -35,14 +35,12 @@ router.get('/find/:idProd', async (req, res, next) => {
 router.post('/create/store', async (req, res, next) => {
   const idUser = req.user.sub;
   try {
-    const response = await service.newStore({ ...req.body}, idUser);
+    const response = await service.newStore({ ...req.body }, idUser);
     res.status(200).json({ data: response }); // REGISTRAR  NUEVO PRODUCTO EN UNA TIENDA
   } catch (e) {
     next(e);
   }
 });
-
-
 
 router.get('/find/store/:idProduct/:nameStore', async (req, res, next) => {
   const idProduct = req.params.idProduct;
@@ -58,7 +56,7 @@ router.get('/find/store/:idProduct/:nameStore', async (req, res, next) => {
 //FILTERS
 router.patch('/update/info/', async (req, res, next) => {
   try {
-    const response = await service.generalUpdate({...req.body}); // ACTUALIZA UNA ESPECIFICACION DE UN PRODUCTO
+    const response = await service.generalUpdate({ ...req.body }); // ACTUALIZA UNA ESPECIFICACION DE UN PRODUCTO
     res.status(200).json({ data: response });
   } catch (e) {
     next(e);

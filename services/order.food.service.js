@@ -10,8 +10,17 @@ class OderFoodService {
     return orders;
   }
 
-  async findByStore(storeId) {
-    const orders = await OrderFood.find({ store: storeId })
+  async findByStore(storeId, date = new Date()) {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    const orders = await OrderFood.find({
+      store: storeId,
+      createdAt: { $gte: start, $lt: end },
+    })
       .populate('store')
       .populate('user', 'name lastname')
       .exec();

@@ -14,13 +14,11 @@ class StoreFoodService {
   }
 
   async create(storeData) {
-    for (let i = 31; i < 101; i++) {
-      const store = new StoreFood({
-        ...storeData,
-        name: `${storeData.name}${i}`,
-      });
-      await store.save();
-    }
+    const store = new StoreFood({
+      ...storeData,
+      name: `${storeData.name}`,
+    });
+    await store.save();
 
     return store;
   }
