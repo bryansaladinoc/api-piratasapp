@@ -1,4 +1,5 @@
 const Role = require('../schemas/role.schema');
+const modelUser = require('../schemas/user.schema');
 
 class RoleService {
   async find() {
@@ -11,6 +12,16 @@ class RoleService {
 
     return role;
   }
+
+  async upRoleUser (idUser, idRole) {
+    const result = await modelUser.findByIdAndUpdate(
+      idUser,
+      { roles: idRole }
+    )
+
+    return result;
+  }
+
 }
 
 module.exports = RoleService;

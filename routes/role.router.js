@@ -21,4 +21,18 @@ Router.post('/', async (req, res, next) => {
   }
 });
 
+
+Router.patch('/upRoleUser', async (req, res, next) => {
+  const data = req.body;
+  const idUser = data.idUser;
+  const idRole = data.idRole;
+
+  try {
+    const role = await service.upRoleUser(idUser, idRole);
+    res.status(201).json({ data: role });
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = Router;
