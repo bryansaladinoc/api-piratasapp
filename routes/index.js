@@ -18,6 +18,9 @@ const roleRouter = require('./role.router');
 const permissionRouter = require('./permission.router');
 const memberRouter = require('./member.router');
 const seatRouter = require('./seat.router');
+const streamRouter = require('./stream.router');
+const territoryRouter = require('./territory.router');
+
 const { userStatus } = require('../middlewares/statuspost.handler');
 
 const routerApi = (app) => {
@@ -58,6 +61,17 @@ const routerApi = (app) => {
     memberRouter,
   );
 
+  router.use(
+    '/stream',
+    passport.authenticate('jwt', { session: false }),
+    streamRouter,
+  );
+
+  router.use(
+    '/territory',
+    passport.authenticate('jwt', { session: false }),
+    territoryRouter,
+  );
   router.use(
     '/news',
     passport.authenticate('jwt', { session: false }),
